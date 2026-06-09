@@ -1,6 +1,6 @@
-# ChatHackers Modules Wrapper
+# ChatHackers Tool Hub
 
-This matrix client acts as a wrapper for other chat hackers modules. Send ⚙️ to wake up.
+This matrix client acts as a wrapper for other chat hackers tools. Send ⚙️ the group chat to wake it up.
 
 ## Getting started
 
