@@ -147,7 +147,8 @@ async function handleModuleEvent(event: MatrixEvent) {
                         sendMessage(event.room_id, forwardResult.response, {
                             moduleEvent: true,
                             wrapperEvent: false
-                        })
+                        });
+                        return;
                     }
 
                     if (forwardResult.response.message) {
@@ -156,6 +157,7 @@ async function handleModuleEvent(event: MatrixEvent) {
                             wrapperEvent: false,
                             ...forwardResult.response.context
                         });
+                        return;
                     }
 
                     if (forwardResult.response[0].message) {
@@ -166,6 +168,7 @@ async function handleModuleEvent(event: MatrixEvent) {
                                 ...response.context
                             })
                         })
+                        return;
                     }
                 }
             }
