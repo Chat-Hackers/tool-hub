@@ -127,7 +127,7 @@ const options: Option[] = [
     question: "Sounds great, let's go!",
     reply: [
       {
-        text: "Ok, great. Just add +44 784 215 1776 to your whatsapp group and then interact with the tool from there!",
+        text: "Ok, great. Just add <number available on request> to your whatsapp group and then interact with the tool from there!",
       },
     ],
   },
