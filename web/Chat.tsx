@@ -75,14 +75,15 @@ export default function Chat() {
                 onChange={(value) => setToolActivation(roomId, tool.id, value)}
               />
             </div>
-            <p>{tool.description}</p>
-            {tool.active && (
-              <>
-                <a href={`/${tool.id}?roomId=${roomId}`}>
-                  <p>Open tool dashboard</p>
-                </a>
-              </>
-            )}
+            <p>
+              {tool.description}
+              {tool.active && (
+                <>
+                  {" "}
+                  - <a href={`/${tool.id}?roomId=${roomId}`}>Tool dashboard</a>
+                </>
+              )}
+            </p>
           </div>
         ))}
     </div>
