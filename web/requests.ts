@@ -1,12 +1,5 @@
 const { VITE_BASE_URL } = import.meta.env;
 
-export async function getRegistrations() {
-    const registrationsResponse = await fetch(`${VITE_BASE_URL}/api/registrations`);
-    const registrationsResult = await registrationsResponse.json();
-
-    return registrationsResult;
-}
-
 export async function getTools(roomId: string) {
     const toolsResponse = await fetch(`${VITE_BASE_URL}/api/tools?roomId=${roomId}`);
     const toolsResult = await toolsResponse.json();

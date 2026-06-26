@@ -4,7 +4,7 @@ import { Wrench, ChartColumnBig, MessagesSquare } from "lucide-react";
 import { type Room, Tool, MatrixEvent } from "../types";
 import { getTools, getRoom, postToolActivation } from "./requests";
 import Toggle from "./common/Toggle";
-import { Message } from "./Home";
+import Message from "./common/Message";
 
 export default function Chat() {
   const [searchParams] = useSearchParams();
