@@ -6,6 +6,7 @@ import { MatrixEvent, ChatModule, RoomResult, Profile } from "../types";
 import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation } from "./duckdb";
 import express from "express";
 import proxy from "express-http-proxy";
+import cors from "cors";
 
 const { userId, dashboard_url } = process.env;
 
@@ -154,7 +155,7 @@ async function handleModuleEvent(event: MatrixEvent) {
             if (module.event_types.includes(event.type)) {
                 console.log(event)
                 const forwardResult: any = await forwardEvent(module, event);
-                console.log("forward result: ", forwardResult)
+                console.log(`forward result from ${module.id}: `, forwardResult)
                 if (forwardResult && forwardResult.response) {
                     if (typeof (forwardResult.response) === "string") {
                         sendMessage(event.room_id, forwardResult.response, {
@@ -175,7 +176,7 @@ async function handleModuleEvent(event: MatrixEvent) {
                         return;
                     }
 
-                    if (forwardResult.response[0].message) {
+                    if (forwardResult.response[0] && forwardResult.response[0].message) {
                         forwardResult.response.forEach(async response => {
                             const recipient = response.recipient;
                             const destination = recipient ? await getDirectRoom(recipient) : event.room_id;
@@ -282,6 +283,7 @@ async function startWebServer() {
     const app = express();
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use(cors())
     const routes = [
         "/",
         "/chat",
