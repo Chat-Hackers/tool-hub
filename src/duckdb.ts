@@ -1,4 +1,5 @@
 import { DuckDBConnection, DuckDBInstance } from "@duckdb/node-api";
+import path from "node:path";
 
 let connection: DuckDBConnection;
 let instance: DuckDBInstance;
@@ -6,7 +7,10 @@ let instance: DuckDBInstance;
 export async function startDuckDB() {
     const chatHackersDuckDBFileName = "chathackers_duckdb.db";
 
-    instance = await DuckDBInstance.create(chatHackersDuckDBFileName);
+    const dataDir = process.env.DUCKDB_DATA_DIR ?? path.resolve(__dirname, "../..");
+    const dbPath = path.join(dataDir, chatHackersDuckDBFileName);
+
+    instance = await DuckDBInstance.create(dbPath);
     connection = await instance.connect();
 
     const tables = [
