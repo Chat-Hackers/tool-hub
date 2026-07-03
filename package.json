@@ -1,7 +1,7 @@
 {
-  "name": "chathackers-wrapper",
+  "name": "tool-hub",
   "version": "1.0.0",
-  "description": "Wrapper app for chathackers chat integration tools",
+  "description": "Hub for chathackers chat integration tools",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
