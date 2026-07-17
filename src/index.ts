@@ -211,6 +211,7 @@ async function sync(batch = null) {
 
     try {
         result = await getSync(batch);
+        console.log(result)
     }
     catch (err) {
         console.log(err)
