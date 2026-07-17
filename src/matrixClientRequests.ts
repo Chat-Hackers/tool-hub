@@ -10,8 +10,8 @@ export const getSync = async (batch: string | null) => {
   if (!syncResponse.ok) {
     const errorBody = await syncResponse.json().catch(() => null);
     throw new Error(
-      `Matrix sync failed: ${syncResponse.status} ${errorBody?.errcode ?? ""} ${errorBody?.error ?? ""}`
-    );
+      `Matrix sync failed: ${syncResponse.status} ${errorBody}`
+    )
   }
 
   const syncResult = await syncResponse.json();
