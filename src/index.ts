@@ -207,9 +207,16 @@ async function loadModules() {
 }
 
 async function sync(batch = null) {
-    const result: any = await getSync(batch);
+    let result: any;
 
-    console.log("result account data", result.account_data)
+    try {
+        result = await getSync(batch);
+    }
+    catch (err) {
+        console.log(err)
+    }
+
+    console.log("account data", result.account_data)
 
     if (result.account_data && result.account_data.events) {
         const directRoomEvent = result.account_data.events.find(event => event.type === "m.direct");
