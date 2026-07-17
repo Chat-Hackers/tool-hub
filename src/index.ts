@@ -36,12 +36,12 @@ async function activateModule(roomId, module, sender) {
 
     if (!moduleActive) {
         await insertActiveModule(module.id, roomId, sender);
-        sendMessage(roomId, `Turning on ${module.title}. Send ${module.wake_word} to start`, {
+        sendMessage(roomId, `Turning on ${module.title}. ${module.introduction}`, {
             moduleEvent: false,
             wrapperEvent: true,
         });
     } else {
-        sendMessage(roomId, `${module.title} is already active. Send ${module.wake_word} to start`, {
+        sendMessage(roomId, `${module.title} is already active. ${module.introduction}`, {
             moduleEvent: false,
             wrapperEvent: true,
         });
