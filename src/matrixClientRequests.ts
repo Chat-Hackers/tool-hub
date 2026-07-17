@@ -6,6 +6,14 @@ export const getSync = async (batch: string | null) => {
       Authorization: `Bearer ${access_token}`,
     },
   })
+
+  if (!syncResponse.ok) {
+    const errorBody = await syncResponse.json().catch(() => null);
+    throw new Error(
+      `Matrix sync failed: ${syncResponse.status} ${errorBody?.errcode ?? ""} ${errorBody?.error ?? ""}`
+    );
+  }
+
   const syncResult = await syncResponse.json();
 
   return syncResult;
