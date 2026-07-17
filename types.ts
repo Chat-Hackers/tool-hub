@@ -14,7 +14,7 @@ export type ChatModule = {
     id: string;
     url: string;
     emoji: string;
-    wake_word: string;
+    introduction: string;
     title: string;
     description: string;
     event_types: string[];

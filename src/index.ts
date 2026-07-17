@@ -209,6 +209,8 @@ async function loadModules() {
 async function sync(batch = null) {
     const result: any = await getSync(batch);
 
+    console.log("result account data", result.account_data)
+
     if (result.account_data && result.account_data.events) {
         const directRoomEvent = result.account_data.events.find(event => event.type === "m.direct");
         if (directRoomEvent && directRoomEvent.content) {
@@ -308,7 +310,7 @@ async function startWebServer() {
             id: module.id,
             url: module.url,
             emoji: module.emoji,
-            wake_word: module.wake_word,
+            introduction: module.introduction,
             title: module.title,
             description: module.description,
             event_types: module.event_types
