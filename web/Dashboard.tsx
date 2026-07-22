@@ -91,12 +91,12 @@ export default function Chat() {
 
   const chatPanel = (
     <div id="phone" style={{ minHeight: "auto" }}>
-      <h2 id="chat-title">Last 100 messages</h2>
+      <h2 id="chat-title">Last 1000 messages</h2>
       <div id="chat-container" ref={chatRef}>
         {room &&
           room.timeline
             .filter((event) => event.type === "m.room.message")
-            .slice(0, 100)
+            .slice(0, 1000)
             .reverse()
             .map((event) => (
               <Message text={event.content.body} side={"left"} />
