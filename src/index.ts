@@ -72,7 +72,7 @@ async function sendWrapperOpener(event) {
 
     const moduleActivations = await getActiveModulesForRoomId(roomId);
 
-    await sendMessage(roomId, "Here are the available tools for this room. Use the ❤️ react to add a tool and the 🙏 react to remove a tool.", {
+    await sendMessage(roomId, "Here are the available tools for this room. Use the ❤️ react to add a tool and the 🙏 react to remove a tool. Use the 👀 react to get a link to the dashboard.", {
         moduleEvent: false,
         wrapperEvent: true
     })
