@@ -1,7 +1,7 @@
 import "dotenv/config";
 import * as fs from "fs";
 import * as path from "path";
-import { getEvent, getSync, joinRoom, sendMessage, sendEvent, getRoomEvents, getProfile, createDirectMessageRoom, updateAccountData } from "./matrixClientRequests";
+import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getRoomEvents, getProfile, createDirectMessageRoom, updateAccountData } from "./matrixClientRequests";
 import { MatrixEvent, ChatModule, RoomResult, Profile } from "../types";
 import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation } from "./duckdb";
 import express from "express";
@@ -228,7 +228,7 @@ async function sync(batch = null) {
     if (result.rooms && result.rooms.invite) {
         for (const roomId in result.rooms.invite) {
             joinRoom(roomId);
-            sendMessage(roomId, "Hi, I'm the chathackers bot. I can add tools to this chat. Send a Gear emoji (⚙️) or react with one to this message to see what tools you have added, and to add or remove tools. You can also react with eyes (👀) to get a dashboard link.", {
+            sendMessage(roomId, "This is the Chat Hackers Whatsapp account. Send a Gear emoji (⚙️) or react with one to this message to see what tools you have added, and to add tools or remove them. You can also react with eyes (👀) to get a dashboard link.", {
                 moduleEvent: false,
                 wrapperEvent: true
             })
@@ -396,10 +396,13 @@ async function startWebServer() {
 }
 
 const start = async () => {
-    await startDuckDB()
+    await startDuckDB();
 
     // load modules
     await loadModules();
+
+    // start matrix session
+    await login();
 
     // start listening for events
     sync();

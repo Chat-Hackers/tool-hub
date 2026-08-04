@@ -1,7 +1,30 @@
-const { access_token, homeserver, userId } = process.env;
+const { homeserver, userId, password } = process.env;
+
+let access_token: string;
+
+export const login = async () => {
+  const loginResponse = await fetch(`${homeserver}/_matrix/client/v3/login`, {
+    method: "POST",
+    body: JSON.stringify({
+      "type": "m.login.password",
+      "user": userId,
+      "password": password,
+      "device_id": "TOOL_HUB"
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    }
+  })
+  const loginResult = await loginResponse.json() as { access_token: string };
+  access_token = loginResult.access_token;
+
+  console.log(loginResult)
+
+  return loginResult;
+}
 
 export const getSync = async (batch: string | null) => {
-  const syncResponse = await fetch(`${homeserver}/_matrix/client/v3/sync?timeout=30000${batch ? `&since=${batch}` : ""}`, {
+  const syncResponse = await fetch(`${homeserver}/_matrix/client/v3/sync?timeout=5000${batch ? `&since=${batch}` : ""}&set_presence=online`, {
     headers: {
       Authorization: `Bearer ${access_token}`,
     },
@@ -20,7 +43,7 @@ export const getSync = async (batch: string | null) => {
 }
 
 export const sendEvent = (roomId: string, content: any, type: string) => {
-  return fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/send/${type}`, {
+  const response = fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/send/${type}`, {
     method: "POST",
     body: JSON.stringify(content),
     headers: {
@@ -28,6 +51,8 @@ export const sendEvent = (roomId: string, content: any, type: string) => {
       Authorization: `Bearer ${access_token}`,
     },
   });
+
+  return response;
 };
 
 export const sendMessage = (roomId: string, message: string, context = {}) => {
