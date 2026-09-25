@@ -14,10 +14,17 @@ const scriptStart = Date.now();
 const handledEventIds: string[] = [];
 const modules: ChatModule[] = [];
 
+async function getDisplayName(event) {
+    const profile = await getProfile(event.sender) as Profile;
+    return profile.displayname;
+}
+
 async function forwardEvent(module, event) {
+    const displayName = await getDisplayName(event);
+
     const response = await fetch(module.url, {
         method: "POST",
-        body: JSON.stringify({ event, botUserId: userId }),
+        body: JSON.stringify({ event, botUserId: userId, displayName }),
         headers: {
             "Content-type": "application/json"
         }
