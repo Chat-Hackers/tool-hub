@@ -227,6 +227,7 @@ a {
   padding: 5px;
   margin: 5px;
   border-radius: 6px;
+  word-break: break-word;
 }
 
 .left {

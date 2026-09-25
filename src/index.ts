@@ -352,7 +352,8 @@ async function startWebServer() {
         const room = {
             timeline: roomResult.chunk,
             id: roomId,
-            title: namingEvent.content.name
+            title: namingEvent.content.name,
+            botId: userId
         }
 
         res.send(room);

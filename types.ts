@@ -28,7 +28,8 @@ export type Tool = ChatModule & {
 export type Room = {
     title: string;
     id: string;
-    timeline: MatrixEvent[]
+    timeline: MatrixEvent[],
+    botId: string;
 }
 
 export type RoomResult = {

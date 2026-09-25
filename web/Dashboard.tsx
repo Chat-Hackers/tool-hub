@@ -99,7 +99,10 @@ export default function Chat() {
             .slice(0, 1000)
             .reverse()
             .map((event) => (
-              <Message text={event.content.body} side={"left"} />
+              <Message
+                text={event.content.body}
+                side={event.sender === room.botId ? "left" : "right"}
+              />
             ))}
       </div>
     </div>
