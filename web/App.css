@@ -230,13 +230,53 @@ a {
   word-break: break-word;
 }
 
+/* Shared size so the button and the player occupy the same space */
+.audio-message {
+  --audio-width: 260px;
+  --audio-height: 40px;
+  max-width: 100%;
+}
+
+.audio-message audio {
+  display: block;
+  width: var(--audio-width);
+  max-width: 100%;
+  height: var(--audio-height);
+}
+
+.audio-load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: var(--audio-width);
+  max-width: 100%;
+  height: var(--audio-height);
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.45);
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.audio-load:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.audio-load:focus-visible {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+
 .left {
   align-self: start;
   background: lightgrey;
 }
 
 .right {
-  align-self: end;
+  align-self: start;
   background: rgb(176, 167, 255);
 }
 
@@ -257,7 +297,7 @@ a {
 
 .triangle.right {
   border-top: 15px solid rgb(176, 167, 255);
-  margin-bottom: 18px;
+  margin-top: 5px;
   margin-left: -16px;
 }
 

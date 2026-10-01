@@ -1,12 +1,10 @@
 import "dotenv/config";
 import * as fs from "fs";
 import * as path from "path";
-import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getRoomEvents, getProfile, createDirectMessageRoom, updateAccountData } from "./matrixClientRequests";
-import { MatrixEvent, ChatModule, RoomResult, Profile } from "../types";
+import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getProfile, createDirectMessageRoom, updateAccountData, getMediaUrl } from "./matrixClientRequests";
+import { MatrixEvent, ChatModule, Profile } from "../types";
 import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation } from "./duckdb";
-import express from "express";
-import proxy from "express-http-proxy";
-import cors from "cors";
+import startWebServer from "./webserver";
 
 const { userId, dashboard_url } = process.env;
 
@@ -37,7 +35,7 @@ async function forwardEvent(module, event) {
         return { success: false, message: "network error" }
 }
 
-async function activateModule(roomId, module, sender) {
+export async function activateModule(roomId, module, sender) {
     const moduleActivations = await getActiveModulesForRoomId(roomId);
     const moduleActive = moduleActivations.find(moduleActivation => moduleActivation.module_id === module.id);
 
@@ -55,7 +53,7 @@ async function activateModule(roomId, module, sender) {
     }
 }
 
-async function deactivateModule(roomId, module) {
+export async function deactivateModule(roomId, module) {
     const moduleActivations = await getActiveModulesForRoomId(roomId);
     const moduleActive = moduleActivations.find(moduleActivation => moduleActivation.module_id === module.id);
 
@@ -293,116 +291,6 @@ async function sync(batch = null) {
     sync(result.next_batch);
 }
 
-async function startWebServer() {
-    const app = express();
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(cors())
-    const routes = [
-        "/",
-        "/chat",
-        "/conversations",
-        "/faq",
-        "/privacy",
-        "/volunteer",
-        "/motivations",
-    ]
-    routes.forEach(route => {
-        app.use(route, express.static("web/dist"));
-    })
-
-    modules.forEach(module => {
-        app.use(`/${module.id}`, proxy(module.url, {
-            proxyReqPathResolver: req => req.url
-        }));
-    })
-
-    app.get("/api/registrations", async (req, res) => {
-        const safeModuleList = modules.map(module => ({
-            id: module.id,
-            url: module.url,
-            emoji: module.emoji,
-            introduction: module.introduction,
-            title: module.title,
-            description: module.description,
-            event_types: module.event_types
-        }));
-
-        res.send(safeModuleList);
-    })
-
-    app.get("/api/tools", async (req, res) => {
-        const { roomId } = req.query;
-
-        const moduleActivations = await getActiveModulesForRoomId(roomId as string);
-        const activeModules = moduleActivations.map(module => module.module_id);
-        const tools = modules.map(module => ({ ...module, active: activeModules.includes(module.id) }))
-
-        res.send(tools);
-    })
-
-    app.get("/api/room", async (req, res) => {
-        const { roomId } = req.query;
-
-        const roomResponse = await getRoomEvents(roomId as string);
-        const roomResult = await roomResponse.json() as RoomResult;
-
-        const namingEvent = roomResult.chunk.find(event => event.type === "m.room.name");
-
-        const room = {
-            timeline: roomResult.chunk,
-            id: roomId,
-            title: namingEvent.content.name,
-            botId: userId
-        }
-
-        res.send(room);
-    })
-
-    app.post("/api/tools", async (req, res) => {
-        const { roomId } = req.query;
-        const { toolId, activation } = req.body;
-
-        const module = modules.find(module => module.id === toolId);
-
-        if (activation) {
-            await activateModule(roomId, module, "dashboard.user");
-        }
-        else {
-            await deactivateModule(roomId, module);
-        }
-
-        res.send({ success: true });
-    })
-
-    app.post("/api/send", async (req, res) => {
-        const { roomId, toolId, secret } = req.query;
-        const { message } = req.body;
-
-        const module = modules.find(module => module.id === toolId);
-
-        if (!module) {
-            res.send({ success: false, message: "no module found with id" });
-        }
-
-        if (!module.secret || module.secret !== secret) {
-            res.send({ success: false, message: "secret does not match registered secret" });
-        }
-
-        const activeModules = await getActiveModulesForRoomId(roomId as string);
-
-        if (activeModules.find(activeModule => activeModule.module_id === module.id)) {
-            sendMessage(roomId as string, message);
-            res.send({ success: true });
-        }
-        else {
-            res.send({ success: false, message: "module is not active in this room" })
-        }
-    })
-
-    app.listen(8138);
-}
-
 const start = async () => {
     await startDuckDB();
 
@@ -416,7 +304,7 @@ const start = async () => {
     sync();
 
     //start web server
-    startWebServer();
+    startWebServer(modules);
 };
 
 start().catch((err) => {

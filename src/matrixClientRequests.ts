@@ -164,3 +164,19 @@ export const getProfile = async (userId: string) => {
   const profile = await response.json()
   return profile;
 };
+
+export const getMediaUrl = (mxcUrl: string): string => {
+  if (!mxcUrl.startsWith("mxc://")) {
+    throw new Error(`Invalid mxc URL: ${mxcUrl}`);
+  }
+
+  const [serverName, mediaId] = mxcUrl.slice("mxc://".length).split("/");
+
+  return `${homeserver}/_matrix/client/v1/media/download/${serverName}/${mediaId}`;
+};
+
+export const getMedia = async (url: string) => {
+  return fetch(url, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+}

@@ -26,3 +26,7 @@ export async function postToolActivation(roomId: string, toolId: string, activat
         }
     })
 }
+
+export function getContentUrl(mxcUrl: string) {
+    return `${VITE_HUB_URL}/api/content?mxcUrl=${mxcUrl}`
+}

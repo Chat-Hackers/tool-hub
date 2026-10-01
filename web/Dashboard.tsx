@@ -4,7 +4,7 @@ import { Wrench, ChartColumnBig, MessagesSquare } from "lucide-react";
 import { type Room, Tool, MatrixEvent } from "../types";
 import { getTools, getRoom, postToolActivation } from "./requests";
 import Toggle from "./common/Toggle";
-import Message from "./common/Message";
+import Message, { AudioMessage } from "./common/Message";
 
 export default function Chat() {
   const [searchParams] = useSearchParams();
@@ -98,12 +98,19 @@ export default function Chat() {
             .filter((event) => event.type === "m.room.message")
             .slice(0, 1000)
             .reverse()
-            .map((event) => (
-              <Message
-                text={event.content.body}
-                side={event.sender === room.botId ? "left" : "right"}
-              />
-            ))}
+            .map((event) =>
+              event.content.msgtype === "m.text" ? (
+                <Message
+                  text={event.content.body}
+                  side={event.sender === room.botId ? "left" : "right"}
+                />
+              ) : (
+                <AudioMessage
+                  url={event.content.url}
+                  side={event.sender === room.botId ? "left" : "right"}
+                />
+              ),
+            )}
       </div>
     </div>
   );
