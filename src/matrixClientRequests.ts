@@ -1,3 +1,5 @@
+import { RoomResult, MatrixEvent } from "../types";
+
 const { homeserver, userId, password } = process.env;
 
 let access_token: string;
@@ -90,6 +92,57 @@ export const getRoomEvents = (roomId: string) => {
     }
   );
 };
+
+export async function fetchEventsSince(
+  roomId: string,
+  since: Temporal.Instant
+): Promise<MatrixEvent[]> {
+  const events: MatrixEvent[] = [];
+  let from: string | undefined;
+
+  while (true) {
+    const params = new URLSearchParams({ dir: "b", limit: "100" });
+    if (from) params.set("from", from);
+
+    const res = await fetch(
+      `${homeserver}/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/messages?${params}`,
+      { headers: { Authorization: `Bearer ${access_token}` } }
+    );
+    if (!res.ok) throw new Error(`Matrix error ${res.status}`);
+
+    const data = (await res.json()) as RoomResult;
+    const chunk = data.chunk ?? [];
+
+    for (const event of chunk) {
+      const eventTime = Temporal.Instant.fromEpochMilliseconds(event.origin_server_ts);
+
+      if (Temporal.Instant.compare(eventTime, since) < 0) {
+        return events; // newest -> oldest, so everything after this is older
+      }
+      events.push(event);
+    }
+
+    if (!data.end || chunk.length === 0) return events;
+    from = data.end;
+  }
+}
+
+export async function getRoomName(
+  roomId: string
+): Promise<string | undefined> {
+  const res = await fetch(
+    `${homeserver}/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/state/m.room.name`,
+    { headers: { Authorization: `Bearer ${access_token}` } }
+  );
+
+  // 404 (M_NOT_FOUND) means the room has no name set
+  if (res.status === 404) return undefined;
+  if (!res.ok) throw new Error(`Matrix error ${res.status}`);
+
+  const content = (await res.json()) as { name: string };
+  return content.name;
+}
+
 
 export const redactEvent = async (
   roomId: string,

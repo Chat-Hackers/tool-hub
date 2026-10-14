@@ -34,6 +34,8 @@ export type Room = {
 
 export type RoomResult = {
     chunk: MatrixEvent[];
+    start: string;
+    end?: string;
 }
 
 export type Profile = {

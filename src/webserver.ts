@@ -3,7 +3,7 @@ import proxy from "express-http-proxy";
 import cors from "cors";
 import { activateModule, deactivateModule } from "./index";
 import { getActiveModulesForRoomId } from "./duckdb";
-import { getRoomEvents, sendMessage, getMediaUrl, getMedia } from "./matrixClientRequests";
+import { getRoomEvents, sendMessage, getMediaUrl, getMedia, fetchEventsSince, getRoomName } from "./matrixClientRequests";
 import { RoomResult } from "../types";
 
 const { userId } = process.env;
@@ -62,16 +62,25 @@ export default async function startWebServer(modules) {
         const roomResponse = await getRoomEvents(roomId as string);
         const roomResult = await roomResponse.json() as RoomResult;
 
-        const namingEvent = roomResult.chunk.find(event => event.type === "m.room.name");
+        const roomName = await getRoomName(roomId as string);
 
         const room = {
             timeline: roomResult.chunk,
             id: roomId,
-            title: namingEvent.content.name,
+            title: roomName,
             botId: userId
         }
 
         res.send(room);
+    })
+
+    app.get("/api/room/history", async (req, res) => {
+        const { roomId, since } = req.query;
+
+        const roomName = await getRoomName(roomId as string);
+        const events = await fetchEventsSince(roomId as string, Temporal.Instant.from(since as string));
+
+        res.send({ events, roomName });
     })
 
     app.post("/api/tools", async (req, res) => {

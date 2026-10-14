@@ -7,8 +7,9 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "lib": ["es2021"],
+        "lib": ["es2022", "esnext.temporal"],
         "jsx": "react-jsx",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "noImplicitAny": false
     }
 }
