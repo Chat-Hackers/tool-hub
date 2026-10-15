@@ -106,21 +106,21 @@ export default async function startWebServer(modules) {
         const module = modules.find(module => module.id === toolId);
 
         if (!module) {
-            res.send({ success: false, message: "no module found with id" });
+            return res.send({ success: false, message: "no module found with id" });
         }
 
         if (!module.secret || module.secret !== secret) {
-            res.send({ success: false, message: "secret does not match registered secret" });
+            return res.send({ success: false, message: "secret does not match registered secret" });
         }
 
         const activeModules = await getActiveModulesForRoomId(roomId as string);
 
         if (activeModules.find(activeModule => activeModule.module_id === module.id)) {
             sendMessage(roomId as string, message);
-            res.send({ success: true });
+            return res.send({ success: true });
         }
         else {
-            res.send({ success: false, message: "module is not active in this room" })
+            return res.send({ success: false, message: "module is not active in this room" })
         }
     })
 
