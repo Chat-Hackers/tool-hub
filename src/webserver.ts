@@ -3,7 +3,7 @@ import proxy from "express-http-proxy";
 import cors from "cors";
 import { activateModule, deactivateModule } from "./index";
 import { getActiveModulesForRoomId } from "./duckdb";
-import { getRoomEvents, sendMessage, getMediaUrl, getMedia, fetchEventsSince, getRoomName } from "./matrixClientRequests";
+import { getRoomEvents, sendMessage, sendEvent, getMediaUrl, getMedia, fetchEventsSince, getRoomName } from "./matrixClientRequests";
 import { RoomResult } from "../types";
 
 const { userId } = process.env;
@@ -101,7 +101,7 @@ export default async function startWebServer(modules) {
 
     app.post("/api/send", async (req, res) => {
         const { roomId, toolId, secret } = req.query;
-        const { message } = req.body;
+        const { message, event } = req.body;
 
         const module = modules.find(module => module.id === toolId);
 
@@ -116,8 +116,15 @@ export default async function startWebServer(modules) {
         const activeModules = await getActiveModulesForRoomId(roomId as string);
 
         if (activeModules.find(activeModule => activeModule.module_id === module.id)) {
-            sendMessage(roomId as string, message);
-            return res.send({ success: true });
+            if (message) {
+                sendMessage(roomId as string, message);
+                return res.send({ success: true });
+            }
+            if (event) {
+                sendEvent(roomId as string, event, event.type);
+                return res.send({ success: true });
+            }
+            return res.send({ success: false, message: "no message or event to send" })
         }
         else {
             return res.send({ success: false, message: "module is not active in this room" })
