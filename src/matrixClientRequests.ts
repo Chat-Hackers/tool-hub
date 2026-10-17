@@ -233,3 +233,22 @@ export const getMedia = async (url: string) => {
     headers: { Authorization: `Bearer ${access_token}` },
   });
 }
+
+export const kickUser = async (roomId: string, userId: string, reason: string) => {
+  const response = await fetch(
+    `${homeserver}/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/kick`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        reason,
+      }),
+    }
+  );
+  const kick = await response.json()
+  return kick;
+}
