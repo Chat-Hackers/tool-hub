@@ -147,6 +147,8 @@ export default async function startWebServer(modules) {
 
         const activeModules = await getActiveModulesForRoomId(roomId as string);
 
+        console.log(activeModules)
+
         if (activeModules.find(activeModule => activeModule.module_id === module.id)) {
             if (userId) {
                 kickUser(roomId as string, userId, reason);
