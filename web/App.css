@@ -60,6 +60,8 @@ a {
 #tools-container {
   /* width: 50%; */
   padding: 5px;
+  max-height: 100vh;
+    overflow-y: auto;
 }
 
 #chat-container {
