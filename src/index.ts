@@ -245,7 +245,7 @@ async function sync(batch = null) {
     if (result.rooms && result.rooms.join) {
         for (const roomId in result.rooms.join) {
             const room = result.rooms.join[roomId];
-            const timeline: MatrixEvent[] = room.timeline.events;
+            const timeline: MatrixEvent[] = room.timeline?.events ?? [];
             timeline.forEach(async event => {
                 if (!handledEventIds.includes(event.event_id) && event.origin_server_ts > scriptStart && event.sender !== userId) {
                     if (event.content && event.content.body && event.content.body.includes("!wa accept")) {
