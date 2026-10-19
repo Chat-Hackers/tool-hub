@@ -218,7 +218,9 @@ async function sync(batch = null) {
         result = await getSync(batch);
     }
     catch (err) {
-        console.log(err)
+        console.log("sync failed, retrying in 5s:", err);
+        setTimeout(() => sync(batch), 5000);
+        return;
     }
 
     if (result.account_data && result.account_data.events) {
