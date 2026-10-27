@@ -5,6 +5,7 @@ const { homeserver, userId, password } = process.env;
 let access_token: string;
 
 export const login = async () => {
+  console.log("logging in with: ", userId, password);
   const loginResponse = await fetch(`${homeserver}/_matrix/client/v3/login`, {
     method: "POST",
     body: JSON.stringify({
