@@ -218,7 +218,7 @@ async function sync(batch = null) {
         result = await getSync(batch);
     }
     catch (err) {
-        console.log("sync failed, retrying in 5s:", err);
+        console.log("sync failed, retrying in 5s:", (err as Error).message);
         setTimeout(() => sync(batch), 5000);
         return;
     }
