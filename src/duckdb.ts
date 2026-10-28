@@ -18,6 +18,16 @@ export async function startDuckDB() {
             name: "ModuleActivations",
             creationCommand:
                 "CREATE TABLE ModuleActivations (module_id VARCHAR, room_id VARCHAR, active BOOLEAN, created_by_user_id VARCHAR);",
+        },
+        {
+            name: "ToolUseSettings",
+            creationCommand:
+                "CREATE TABLE ToolUseSettings (room_id VARCHAR, admin_only BOOLEAN);"
+        },
+        {
+            name: "AdminTokens",
+            creationCommand:
+                "CREATE TABEL AdminTokens (room_id VARCHAR, admin_token: VARCHAR);"
         }
     ]
 
@@ -51,6 +61,47 @@ export async function insertActiveModule(moduleId, roomId, userId) {
 export async function updateModuleActivation(moduleId, roomId, active) {
     const updateModuleActivation = `UPDATE ModuleActivations SET active=${active ? 'TRUE' : 'FALSE'} WHERE module_id='${moduleId}' AND room_id='${roomId}';`;
     await connection.run(updateModuleActivation);
+}
+
+export async function insertToolUseSetting(roomId: string, adminOnly: boolean) {
+    const insertToolUseSetting = `INSERT INTO ToolUseSettings VALUES ($1, $2);`;
+    const prepared = await connection.prepare(insertToolUseSetting);
+    prepared.bindVarchar(1, roomId);
+    prepared.bindBoolean(2, adminOnly);
+    await prepared.run();
+}
+
+export async function getToolUseSetting(roomId: string) {
+    const selectToolUseSetting = `SELECT FROM ToolUseSettings WHERE room_id=$1;`;
+    const prepared = await connection.prepare(selectToolUseSetting);
+    prepared.bindVarchar(1, roomId);
+    const toolUseSettingsRows = await prepared.run();
+    const toolUseSettings = await toolUseSettingsRows.getRowObjects();
+    return toolUseSettings;
+}
+
+export async function deleteToolUseSettings(roomId: string) {
+    const deleteToolUseSettings = `DELETE ToolUseSettings WHERE room_id=$1;`;
+    const prepared = await connection.prepare(deleteToolUseSettings);
+    prepared.bindVarchar(1, roomId);
+    await prepared.run();
+}
+
+export async function insertAdminToken(roomId: string, token: string) {
+    const insertAdminToken = `INSERT INTO AdminTokens VALUES ($1, $2);`;
+    const prepared = await connection.prepare(insertAdminToken);
+    prepared.bindVarchar(1, roomId);
+    prepared.bindVarchar(2, token);
+    await prepared.run();
+}
+
+export async function getAdminTokens(roomId: string) {
+    const selectAdminTokens = `SELECT * FROM AdminTokens WHERE room_id=$1;`;
+    const prepared = await connection.prepare(selectAdminTokens);
+    prepared.bindVarchar(1, roomId);
+    const adminTokensRows = await prepared.run();
+    const adminTokens = await adminTokensRows.getRowObjects();
+    return adminTokens;
 }
 
 process.on("SIGINT", () => {
