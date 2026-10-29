@@ -64,7 +64,7 @@ export async function updateModuleActivation(moduleId, roomId, active) {
 }
 
 export async function insertToolUseSetting(roomId: string, adminOnly: boolean) {
-    const insertToolUseSetting = `INSERT INTO ToolUseSettings VALUES ($1, $2);`;
+    const insertToolUseSetting = `INSERT INTO ToolUseSettings (room_id, admin_only) VALUES ($1, $2);`;
     const prepared = await connection.prepare(insertToolUseSetting);
     prepared.bindVarchar(1, roomId);
     prepared.bindBoolean(2, adminOnly);
@@ -72,12 +72,12 @@ export async function insertToolUseSetting(roomId: string, adminOnly: boolean) {
 }
 
 export async function getToolUseSetting(roomId: string) {
-    const selectToolUseSetting = `SELECT FROM ToolUseSettings WHERE room_id=$1;`;
+    const selectToolUseSetting = `SELECT * FROM ToolUseSettings WHERE room_id=$1;`;
     const prepared = await connection.prepare(selectToolUseSetting);
     prepared.bindVarchar(1, roomId);
     const toolUseSettingsRows = await prepared.run();
     const toolUseSettings = await toolUseSettingsRows.getRowObjects();
-    return toolUseSettings;
+    return toolUseSettings[0] as { room_id: string; admin_only: boolean } | undefined;
 }
 
 export async function deleteToolUseSettings(roomId: string) {
@@ -88,7 +88,7 @@ export async function deleteToolUseSettings(roomId: string) {
 }
 
 export async function insertAdminToken(roomId: string, token: string) {
-    const insertAdminToken = `INSERT INTO AdminTokens VALUES ($1, $2);`;
+    const insertAdminToken = `INSERT INTO AdminTokens (room_id, token) VALUES ($1, $2);`;
     const prepared = await connection.prepare(insertAdminToken);
     prepared.bindVarchar(1, roomId);
     prepared.bindVarchar(2, token);

@@ -1,20 +1,37 @@
 import "dotenv/config";
 import * as fs from "fs";
 import * as path from "path";
-import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getProfile, createDirectMessageRoom, updateAccountData, getMediaUrl } from "./matrixClientRequests";
-import { MatrixEvent, ChatModule, Profile } from "../types";
-import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings } from "./duckdb";
+import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getProfile, createDirectMessageRoom, updateAccountData, getMediaUrl, getPowerLevels } from "./matrixClientRequests";
+import { MatrixEvent, ChatTool, Profile, ToolUseSetting } from "../types";
+import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings, getToolUseSetting } from "./duckdb";
 import startWebServer from "./webserver";
 
 const { userId, dashboard_url } = process.env;
 
 const scriptStart = Date.now();
 const handledEventIds: string[] = [];
-const modules: ChatModule[] = [];
+const modules: ChatTool[] = [];
 
 async function getDisplayName(event) {
     const profile = await getProfile(event.sender) as Profile;
     return profile.displayname;
+}
+
+async function checkAdmin(roomId: string, userId: string): Promise<boolean> {
+    const ADMIN_POWER_LEVEL = 50;
+
+    try {
+        const res = await getPowerLevels(roomId);
+        if (!res.ok) return false;
+
+        const content = (await res.json()) as { users?: { [key: string]: number }, users_default: number };
+        const level = content.users?.[userId] ?? content.users_default ?? 0;
+
+        return level >= ADMIN_POWER_LEVEL;
+    } catch (err) {
+        console.error(`Failed to check admin status for ${userId} in ${roomId}:`, err);
+        return false;
+    }
 }
 
 async function forwardEvent(module, event) {
@@ -171,55 +188,76 @@ async function getDirectRoom(recipient: string) {
     return room_id;
 }
 
-async function handleModuleEvent(event: MatrixEvent) {
-    const moduleActivations = await getActiveModulesForRoomId(event.room_id);
+async function handleToolResponse(roomId: string, response: any) {
+    if (typeof (response) === "string") {
+        sendMessage(roomId, response, {
+            moduleEvent: true,
+            wrapperEvent: false
+        });
+        return;
+    }
+
+    if (response.message) {
+        const recipient = response.recipient;
+        const destination = recipient ? await getDirectRoom(recipient) : roomId;
+        sendMessage(destination, response.message, {
+            moduleEvent: true,
+            wrapperEvent: false,
+            ...response.context
+        });
+        return;
+    }
+
+    if (response[0] && response[0].message) {
+        response.forEach(async response => {
+            const recipient = response.recipient;
+            const destination = recipient ? await getDirectRoom(recipient) : roomId;
+            sendMessage(destination, response.message, {
+                moduleEvent: true,
+                wrapperEvent: false,
+                ...response.context
+            })
+        })
+        return;
+    }
+}
+
+async function handleToolEvent(event: MatrixEvent) {
+    const toolActivations = await getActiveModulesForRoomId(event.room_id);
 
     modules
-        .filter(module => moduleActivations.find(moduleActivation => moduleActivation.module_id === module.id))
-        .forEach(async (module) => {
-            if (module.event_types.includes(event.type)) {
-                console.log(event)
-                const forwardResult: any = await forwardEvent(module, event);
-                console.log(`forward result from ${module.id}: `, forwardResult)
+        .filter(tool => toolActivations.find(toolActivation => toolActivation.module_id === tool.id))
+        .forEach(async (tool) => {
+            if (tool.event_types.passive?.includes(event.type)) {
+                console.log(`passive event sent to ${tool.id}`, event)
+                const forwardResult: any = await forwardEvent(tool, event);
+                console.log(`forward result from ${tool.id}: `, forwardResult)
+
                 if (forwardResult && forwardResult.response) {
-                    if (typeof (forwardResult.response) === "string") {
-                        sendMessage(event.room_id, forwardResult.response, {
-                            moduleEvent: true,
-                            wrapperEvent: false
-                        });
+                    handleToolResponse(event.room_id, forwardResult.response);
+                }
+            }
+            if (tool.event_types.active?.includes(event.type)) {
+                const toolUseSetting = (await getToolUseSetting(event.room_id)) as ToolUseSetting;
+                if (toolUseSetting && toolUseSetting.admin_only) {
+                    const isAdmin = await checkAdmin(event.room_id, event.sender)
+                    if (!isAdmin)
                         return;
-                    }
+                }
 
-                    if (forwardResult.response.message) {
-                        const recipient = forwardResult.response.recipient;
-                        const destination = recipient ? await getDirectRoom(recipient) : event.room_id;
-                        sendMessage(destination, forwardResult.response.message, {
-                            moduleEvent: true,
-                            wrapperEvent: false,
-                            ...forwardResult.response.context
-                        });
-                        return;
-                    }
+                console.log(`active event sent to ${tool.id}`, event)
+                const forwardResult: any = await forwardEvent(tool, event);
+                console.log(`forward result from ${tool.id}: `, forwardResult)
 
-                    if (forwardResult.response[0] && forwardResult.response[0].message) {
-                        forwardResult.response.forEach(async response => {
-                            const recipient = response.recipient;
-                            const destination = recipient ? await getDirectRoom(recipient) : event.room_id;
-                            sendMessage(destination, response.message, {
-                                moduleEvent: true,
-                                wrapperEvent: false,
-                                ...response.context
-                            })
-                        })
-                        return;
-                    }
+                if (forwardResult && forwardResult.response) {
+                    handleToolResponse(event.room_id, forwardResult.response);
                 }
             }
         }
         )
 }
 
-async function loadModules() {
+async function loadTools() {
     const registrationPath = path.resolve("./registrations");
     const registrationFiles = fs.readdirSync(registrationPath);
 
@@ -311,7 +349,7 @@ async function sync(batch = null) {
                         event.prevEvent.sender === userId)
                         handleWrapperEvent(event);
                     else
-                        handleModuleEvent(event);
+                        handleToolEvent(event);
 
                     handledEventIds.push(event.event_id);
                 }
@@ -326,7 +364,7 @@ const start = async () => {
     await startDuckDB();
 
     // load modules
-    await loadModules();
+    await loadTools();
 
     // start matrix session
     await login();

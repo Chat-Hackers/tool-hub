@@ -8,20 +8,21 @@ export type MatrixEvent = {
     prevEvent?: any;
     state_key?: string;
     displayname?: string;
+    sentByAdmin?: boolean;
 };
 
-export type ChatModule = {
+export type ChatTool = {
     id: string;
     url: string;
     emoji: string;
     introduction: string;
     title: string;
     description: string;
-    event_types: string[];
+    event_types: { active: string[], passive: string[] };
     secret?: string;
 }
 
-export type Tool = ChatModule & {
+export type Tool = ChatTool & {
     active: boolean;
 }
 
@@ -41,4 +42,9 @@ export type RoomResult = {
 export type Profile = {
     displayname: string;
     avatar_url: string;
+}
+
+export type ToolUseSetting = {
+    room_id: string;
+    admin_only: boolean;
 }
