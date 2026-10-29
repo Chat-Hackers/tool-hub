@@ -253,3 +253,15 @@ export const kickUser = async (roomId: string, userId: string, reason: string) =
   const kick = await response.json()
   return kick;
 }
+
+export const getPowerLevels = async (roomId: string) => {
+  return fetch(
+    `${homeserver}/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/state/m.room.power_levels/`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    }
+  );
+}
