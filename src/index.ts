@@ -264,7 +264,14 @@ async function loadTools() {
     registrationFiles.forEach(fileName => {
         const filePath = path.resolve(`./registrations/${fileName}`);
         const registrationBuffer = fs.readFileSync(filePath);
-        const registration = JSON.parse(registrationBuffer.toString());
+        let registration;
+        try {
+            registration = JSON.parse(registrationBuffer.toString());
+        }
+        catch (err) {
+            console.log(fileName, err)
+        }
+
         modules.push(registration);
     })
 }
