@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getProfile, createDirectMessageRoom, updateAccountData, getMediaUrl, getPowerLevels } from "./matrixClientRequests";
 import { MatrixEvent, ChatTool, Profile, ToolUseSetting } from "../types";
-import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings, getToolUseSetting } from "./duckdb";
+import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings, getToolUseSetting, insertAdminToken } from "./duckdb";
 import startWebServer from "./webserver";
 
 const { userId, dashboard_url } = process.env;
@@ -152,6 +152,12 @@ async function handleWrapperEvent(event: MatrixEvent) {
             moduleEvent: false,
             wrapperEvent: true,
         })
+        return;
+    }
+
+    if (context.newAdminCode && emoji.includes("❤️")) {
+        await insertAdminToken(roomId, context.newAdminCode);
+        sendMessage(roomId, `Access has been granted to this session`);
         return;
     }
 
