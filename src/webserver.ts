@@ -2,7 +2,7 @@ import express from "express";
 import proxy from "express-http-proxy";
 import cors from "cors";
 import { activateModule, deactivateModule } from "./index";
-import { getActiveModulesForRoomId } from "./duckdb";
+import { getActiveModulesForRoomId, getAdminTokens, getToolUseSetting } from "./duckdb";
 import { getRoomEvents, sendMessage, sendEvent, getMediaUrl, getMedia, fetchEventsSince, getRoomName, kickUser } from "./matrixClientRequests";
 import { RoomResult } from "../types";
 
@@ -44,6 +44,38 @@ export default async function startWebServer(modules) {
         }));
 
         res.send(safeModuleList);
+    })
+
+    app.get("/api/tooluse", async (req, res) => {
+        const { roomId } = req.query;
+
+        const toolUseSetting = await getToolUseSetting(roomId as string);
+
+        res.send(toolUseSetting);
+    })
+
+    app.get("/api/admincode", async (req, res) => {
+        const { roomId, adminCode } = req.query;
+
+        const adminTokens = await getAdminTokens(roomId as string);
+
+        if (adminTokens.find(token => token.admin_token === adminCode as string)) {
+            res.send({ success: true });
+        }
+        res.send({ success: false });
+    })
+
+    app.post("/api/admincode", async (req, res) => {
+        const { roomId, newAdminCode } = req.body;
+
+        await sendMessage(roomId, `Someone is attempting to access the dashboard. 
+            An admin must heart react (❤️) this message to allow access`, {
+            wrapperEvent: true,
+            moduleEvent: false,
+            newAdminCode
+        })
+
+        res.send({ success: true });
     })
 
     app.get("/api/tools", async (req, res) => {

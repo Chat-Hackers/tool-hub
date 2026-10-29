@@ -1,5 +1,12 @@
 const { VITE_HUB_URL } = import.meta.env;
 
+export async function getToolUseSetting(roomId: string) {
+    const toolUseResponse = await fetch(`${VITE_HUB_URL}/api/tooluse?roomId=${roomId}`);
+    const toolUseResult = await toolUseResponse.json();
+
+    return toolUseResult;
+}
+
 export async function getTools(roomId: string) {
     const toolsResponse = await fetch(`${VITE_HUB_URL}/api/tools?roomId=${roomId}`);
     const toolsResult = await toolsResponse.json();
@@ -25,6 +32,26 @@ export async function postToolActivation(roomId: string, toolId: string, activat
             "Content-type": "application/json"
         }
     })
+}
+
+export async function postNewAdminCode(roomId: string, newAdminCode: string) {
+    return fetch(`${VITE_HUB_URL}/api/admincode`, {
+        method: "POST",
+        body: JSON.stringify({
+            roomId,
+            newAdminCode
+        }),
+        headers: {
+            "Content-type": "application/json"
+        }
+    })
+}
+
+export async function checkCode(roomId: string, adminCode: string) {
+    const checkResponse = await fetch(`${VITE_HUB_URL}/api/admincode?roomId=${roomId}&adminCode=${adminCode}`)
+    const checkResult = await checkResponse.json();
+
+    return checkResult.success;
 }
 
 export function getContentUrl(mxcUrl: string) {

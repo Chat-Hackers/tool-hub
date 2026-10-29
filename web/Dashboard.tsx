@@ -2,17 +2,31 @@ import { useSearchParams, Link } from "react-router";
 import { useEffect, useState, useRef } from "react";
 import { Wrench, ChartColumnBig, MessagesSquare } from "lucide-react";
 import { type Room, Tool, MatrixEvent } from "../types";
-import { getTools, getRoom, postToolActivation } from "./requests";
+import {
+  getTools,
+  getRoom,
+  postToolActivation,
+  getToolUseSetting,
+  postNewAdminCode,
+} from "./requests";
 import Toggle from "./common/Toggle";
 import Message, { AudioMessage } from "./common/Message";
+import Validation from "./Validation";
 
-export default function Chat() {
-  const [searchParams] = useSearchParams();
+export default function Dashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const roomId = searchParams.get("roomId");
+  const [adminOnly, setAdminOnly] = useState(true);
+  const [admin, setAdmin] = useState(false);
   const [tools, setTools] = useState<Tool[]>([]);
   const [room, setRoom] = useState<Room>();
   const [nav, setNav] = useState<"tools" | "chat" | "stats">("tools");
   const chatRef = useRef<HTMLDivElement>(null);
+
+  async function loadToolUseSetting(roomId: string) {
+    const toolUseSetting = await getToolUseSetting(roomId);
+    setAdminOnly(toolUseSetting.admin_only);
+  }
 
   async function loadTools(roomId: string) {
     const tools = await getTools(roomId);
@@ -37,6 +51,7 @@ export default function Chat() {
 
   useEffect(() => {
     if (roomId) {
+      loadToolUseSetting(roomId);
       loadTools(roomId);
       loadRoom(roomId);
     }
@@ -148,7 +163,18 @@ export default function Chat() {
     backgroundColor: "grey",
   };
 
-  return isDesktop ? (
+  console.log("adminonly", adminOnly, "admin", admin);
+
+  return adminOnly && !admin ? (
+    <>
+      <Validation
+        roomId={roomId as string}
+        searchParams={searchParams}
+        setSearchParams={setSearchParams}
+        setAdmin={setAdmin}
+      />
+    </>
+  ) : isDesktop ? (
     <div id="tools-chat-container">
       {toolsPanel}
       {chatPanel}
