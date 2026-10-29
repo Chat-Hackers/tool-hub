@@ -14,9 +14,8 @@ import Message, { AudioMessage } from "./common/Message";
 import Validation from "./Validation";
 
 export default function Dashboard() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const roomId = searchParams.get("roomId");
-  const adminCode = searchParams.get("adminCode");
   const [adminOnly, setAdminOnly] = useState(true);
   const [admin, setAdmin] = useState(false);
   const [tools, setTools] = useState<Tool[]>([]);
@@ -164,11 +163,14 @@ export default function Dashboard() {
     backgroundColor: "grey",
   };
 
+  console.log("adminonly", adminOnly, "admin", admin);
+
   return adminOnly && !admin ? (
     <>
       <Validation
         roomId={roomId as string}
         searchParams={searchParams}
+        setSearchParams={setSearchParams}
         setAdmin={setAdmin}
       />
     </>

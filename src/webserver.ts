@@ -60,9 +60,9 @@ export default async function startWebServer(modules) {
         const adminTokens = await getAdminTokens(roomId as string);
 
         if (adminTokens.find(token => token.admin_token === adminCode as string)) {
-            res.send(true);
+            res.send({ success: true });
         }
-        res.send(false);
+        res.send({ success: false });
     })
 
     app.post("/api/admincode", async (req, res) => {

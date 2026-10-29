@@ -88,7 +88,7 @@ export async function deleteToolUseSettings(roomId: string) {
 }
 
 export async function insertAdminToken(roomId: string, token: string) {
-    const insertAdminToken = `INSERT INTO AdminTokens (room_id, token) VALUES ($1, $2);`;
+    const insertAdminToken = `INSERT INTO AdminTokens (room_id, admin_token) VALUES ($1, $2);`;
     const prepared = await connection.prepare(insertAdminToken);
     prepared.bindVarchar(1, roomId);
     prepared.bindVarchar(2, token);

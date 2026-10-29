@@ -48,7 +48,10 @@ export async function postNewAdminCode(roomId: string, newAdminCode: string) {
 }
 
 export async function checkCode(roomId: string, adminCode: string) {
-    return fetch(`${VITE_HUB_URL}/api/admincode?roomId=${roomId}&adminCode=${adminCode}`)
+    const checkResponse = await fetch(`${VITE_HUB_URL}/api/admincode?roomId=${roomId}&adminCode=${adminCode}`)
+    const checkResult = await checkResponse.json();
+
+    return checkResult.success;
 }
 
 export function getContentUrl(mxcUrl: string) {

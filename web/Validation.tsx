@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { postNewAdminCode, checkCode } from "./requests";
+import { SetURLSearchParams } from "react-router";
 
 function generateToken(length = 16) {
   const chars =
@@ -11,10 +12,12 @@ function generateToken(length = 16) {
 export default function Validation({
   roomId,
   searchParams,
+  setSearchParams,
   setAdmin,
 }: {
   roomId: string;
   searchParams: URLSearchParams;
+  setSearchParams: SetURLSearchParams;
   setAdmin: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [stage, setStage] = useState<"ready" | "inProgress" | "complete">(
@@ -25,7 +28,11 @@ export default function Validation({
   async function startValidation() {
     if (roomId) {
       const newAdminCode = generateToken();
-      searchParams.set("adminCode", newAdminCode);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("adminCode", newAdminCode);
+        return next;
+      });
       postNewAdminCode(roomId, newAdminCode);
       setStage("inProgress");
     }
@@ -34,6 +41,7 @@ export default function Validation({
   async function checkApproval() {
     if (roomId && adminCode) {
       const approval = await checkCode(roomId, adminCode);
+      console.log(approval);
       if (approval) {
         setAdmin(true);
       }
