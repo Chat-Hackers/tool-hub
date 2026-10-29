@@ -27,7 +27,7 @@ export async function startDuckDB() {
         {
             name: "AdminTokens",
             creationCommand:
-                "CREATE TABEL AdminTokens (room_id VARCHAR, admin_token: VARCHAR);"
+                "CREATE TABLE AdminTokens (room_id VARCHAR, admin_token VARCHAR);"
         }
     ]
 
@@ -81,7 +81,7 @@ export async function getToolUseSetting(roomId: string) {
 }
 
 export async function deleteToolUseSettings(roomId: string) {
-    const deleteToolUseSettings = `DELETE ToolUseSettings WHERE room_id=$1;`;
+    const deleteToolUseSettings = `DELETE FROM ToolUseSettings WHERE room_id=$1;`;
     const prepared = await connection.prepare(deleteToolUseSettings);
     prepared.bindVarchar(1, roomId);
     await prepared.run();
