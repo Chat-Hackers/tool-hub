@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getProfile, createDirectMessageRoom, updateAccountData, getMediaUrl } from "./matrixClientRequests";
 import { MatrixEvent, ChatModule, Profile } from "../types";
-import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation } from "./duckdb";
+import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings } from "./duckdb";
 import startWebServer from "./webserver";
 
 const { userId, dashboard_url } = process.env;
@@ -112,6 +112,26 @@ async function handleWrapperEvent(event: MatrixEvent) {
 
     if (emoji.includes("👀")) {
         await sendMessage(roomId, `Your dashboard can be found at ${dashboard_url}/chat?roomId=${roomId}`, {
+            moduleEvent: false,
+            wrapperEvent: true,
+        })
+        return;
+    }
+
+    if (emoji.includes("🔒")) {
+        await deleteToolUseSettings(roomId);
+        await insertToolUseSetting(roomId, true);
+        await sendMessage(roomId, `Chat Hackers is now admin-only. Add an unlock (🔓) react to enable all users`, {
+            moduleEvent: false,
+            wrapperEvent: true,
+        })
+        return;
+    }
+
+    if (emoji.includes("🔓")) {
+        await deleteToolUseSettings(roomId);
+        await insertToolUseSetting(roomId, false);
+        await sendMessage(roomId, `Chat Hackers can be used by all users. Add a lock (🔒) react to make admin-only`, {
             moduleEvent: false,
             wrapperEvent: true,
         })
@@ -232,10 +252,19 @@ async function sync(batch = null) {
         }
     }
 
+    // joining new rooms
     if (result.rooms && result.rooms.invite) {
         for (const roomId in result.rooms.invite) {
             await joinRoom(roomId);
-            sendMessage(roomId, "Hello and welcome to Chat Hackers! Send a Gear emoji (⚙️) to see your tool options. Add an eyes (👀) react to this message to get a dashboard link.", {
+            await sendMessage(roomId, `Hello and welcome to Chat Hackers! 
+                Send a Gear emoji (⚙️) to see your tool options. 
+                Add an eyes (👀) react to this message to 
+                get a dashboard link.`, {
+                moduleEvent: false,
+                wrapperEvent: true
+            })
+            await sendMessage(roomId, `To make tools and the dashboard admin-only, 
+                add a lock (🔒) react to this message`, {
                 moduleEvent: false,
                 wrapperEvent: true
             })
