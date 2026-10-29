@@ -156,8 +156,11 @@ async function handleWrapperEvent(event: MatrixEvent) {
     }
 
     if (context.newAdminCode && emoji.includes("❤️")) {
-        await insertAdminToken(roomId, context.newAdminCode);
-        sendMessage(roomId, `Access has been granted to this session`);
+        const isAdmin = await checkAdmin(roomId, event.sender);
+        if (isAdmin) {
+            await insertAdminToken(roomId, context.newAdminCode);
+            sendMessage(roomId, `Access has been granted to this session`);
+        }
         return;
     }
 
