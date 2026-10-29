@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { postNewAdminCode, checkCode } from "./requests";
 
 function generateToken(length = 16) {
@@ -39,6 +39,10 @@ export default function Validation({
       }
     }
   }
+
+  useEffect(() => {
+    checkApproval();
+  }, [adminCode]);
 
   return (
     <>
