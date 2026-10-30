@@ -336,7 +336,7 @@ async function sync(batch = null) {
                 wrapperEvent: true
             })
             await sendMessage(roomId, "To opt-out of having your data processed " +
-                "by Chat Hackers, add an X (❌) react to this message." {
+                "by Chat Hackers, add an X (❌) react to this message.", {
                 moduleEvent: false,
                 wrapperEvent: true
             })
