@@ -2,7 +2,7 @@ import express from "express";
 import proxy from "express-http-proxy";
 import cors from "cors";
 import { activateModule, deactivateModule } from "./index";
-import { getActiveModulesForRoomId, getAdminTokens, getToolUseSetting } from "./duckdb";
+import { getActiveModulesForRoomId, getAdminTokens, getOptOutsByRoomId, getToolUseSetting } from "./duckdb";
 import { getRoomEvents, sendMessage, sendEvent, getMediaUrl, getMedia, fetchEventsSince, getRoomName, kickUser } from "./matrixClientRequests";
 import { RoomResult } from "../types";
 
@@ -96,8 +96,11 @@ export default async function startWebServer(modules) {
 
         const roomName = await getRoomName(roomId as string);
 
+        const optOutsList = (await getOptOutsByRoomId(roomId as string)).map(optOut => optOut.user_id);
+        const timeline = roomResult.chunk.filter(event => !optOutsList.includes(event.sender));
+
         const room = {
-            timeline: roomResult.chunk,
+            timeline,
             id: roomId,
             title: roomName,
             botId: userId
@@ -112,7 +115,10 @@ export default async function startWebServer(modules) {
         const roomName = await getRoomName(roomId as string);
         const events = await fetchEventsSince(roomId as string, Temporal.Instant.from(since as string));
 
-        res.send({ events, roomName });
+        const optOutsList = (await getOptOutsByRoomId(roomId as string)).map(optOut => optOut.user_id);
+        const filteredEvents = events.filter(event => !optOutsList.includes(event.sender));
+
+        res.send({ events: filteredEvents, roomName });
     })
 
     app.post("/api/tools", async (req, res) => {

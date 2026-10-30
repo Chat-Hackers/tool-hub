@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { login, getEvent, getSync, joinRoom, sendMessage, sendEvent, getProfile, createDirectMessageRoom, updateAccountData, getMediaUrl, getPowerLevels } from "./matrixClientRequests";
 import { MatrixEvent, ChatTool, Profile, ToolUseSetting } from "../types";
-import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings, getToolUseSetting, insertAdminToken } from "./duckdb";
+import { startDuckDB, getActiveModulesForRoomId, insertActiveModule, updateModuleActivation, insertToolUseSetting, deleteToolUseSettings, getToolUseSetting, insertAdminToken, insertOptOut, deleteOptOut, getOptOut } from "./duckdb";
 import startWebServer from "./webserver";
 
 const { userId, dashboard_url } = process.env;
@@ -152,6 +152,18 @@ async function handleWrapperEvent(event: MatrixEvent) {
             moduleEvent: false,
             wrapperEvent: true,
         })
+        return;
+    }
+
+    if (emoji.includes("❌")) {
+        await insertOptOut(roomId, event.sender);
+        await sendMessage(roomId, "You have opted out of Chat Hackers processing your data. Use the tick (✔️) react to opt back in.");
+        return;
+    }
+
+    if (emoji.includes("✔️")) {
+        await deleteOptOut(roomId, event.sender);
+        await sendMessage(roomId, "You have opted back in to Chat Hackers processing your data. Use the cross (❌) react to opt back out.");
         return;
     }
 
@@ -310,15 +322,21 @@ async function sync(batch = null) {
     if (result.rooms && result.rooms.invite) {
         for (const roomId in result.rooms.invite) {
             await joinRoom(roomId);
-            await sendMessage(roomId, `Hello and welcome to Chat Hackers! 
-                Send a Gear emoji (⚙️) to see your tool options. 
-                Add an eyes (👀) react to this message to 
-                get a dashboard link.`, {
+            await sendMessage(roomId, "Hello and welcome to Chat Hackers! " +
+                "Send a Gear emoji (⚙️) " +
+                "to see your tool settings. " +
+                "Add an eyes (👀) react to this message to " +
+                "get a dashboard link.", {
                 moduleEvent: false,
                 wrapperEvent: true
             })
-            await sendMessage(roomId, `To make tools and the dashboard admin-only, 
-                add a lock (🔒) react to this message`, {
+            await sendMessage(roomId, "To make tools and the dashboard admin-only, " +
+                "add a lock (🔒) react to this message", {
+                moduleEvent: false,
+                wrapperEvent: true
+            })
+            await sendMessage(roomId, "To opt-out of having your data processed " +
+                "by Chat Hackers, add an X (❌) react to this message." {
                 moduleEvent: false,
                 wrapperEvent: true
             })
@@ -364,8 +382,11 @@ async function sync(batch = null) {
                         event.prevEvent.content.context.wrapperEvent &&
                         event.prevEvent.sender === userId)
                         handleWrapperEvent(event);
-                    else
-                        handleToolEvent(event);
+                    else {
+                        const optOut = await getOptOut(roomId, event.sender);
+                        if (!optOut)
+                            handleToolEvent(event);
+                    }
 
                     handledEventIds.push(event.event_id);
                 }

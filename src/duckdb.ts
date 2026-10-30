@@ -28,6 +28,10 @@ export async function startDuckDB() {
             name: "AdminTokens",
             creationCommand:
                 "CREATE TABLE AdminTokens (room_id VARCHAR, admin_token VARCHAR);"
+        }, {
+            name: "OptOuts",
+            creationCommand:
+                "CREATE TABLE OptOuts (room_id VARCHAR, user_id VARCHAR);"
         }
     ]
 
@@ -102,6 +106,41 @@ export async function getAdminTokens(roomId: string) {
     const adminTokensRows = await prepared.run();
     const adminTokens = await adminTokensRows.getRowObjects();
     return adminTokens;
+}
+
+export async function getOptOut(roomId: string, userId: string) {
+    const selectOptOut = `SELECT * FROM OptOuts WHERE room_id=$1 AND user_id=$2;`;
+    const prepared = await connection.prepare(selectOptOut);
+    prepared.bindVarchar(1, roomId);
+    prepared.bindVarchar(2, userId);
+    const optOutRows = await prepared.run();
+    const optOuts = await optOutRows.getRowObjects();
+    return optOuts[0];
+}
+
+export async function getOptOutsByRoomId(roomId: string) {
+    const selectOptOuts = `SELECT * FROM OptOuts WHERE room_id=$1;`;
+    const prepared = await connection.prepare(selectOptOuts);
+    prepared.bindVarchar(1, roomId);
+    const optOutRows = await prepared.run();
+    const optOuts = await optOutRows.getRowObjects();
+    return optOuts;
+}
+
+export async function insertOptOut(roomId: string, userId: string) {
+    const insertOptOut = `INSERT INTO OptOuts (room_id, user_id) VALUES ($1, $2);`;
+    const prepared = await connection.prepare(insertOptOut);
+    prepared.bindVarchar(1, roomId);
+    prepared.bindVarchar(2, userId);
+    await prepared.run();
+}
+
+export async function deleteOptOut(roomId: string, userId: string) {
+    const deleteOptOut = `DELETE FROM OptOuts WHERE room_id=$1 AND user_id=$2;`;
+    const prepared = await connection.prepare(deleteOptOut);
+    prepared.bindVarchar(1, roomId);
+    prepared.bindVarchar(2, userId);
+    await prepared.run();
 }
 
 process.on("SIGINT", () => {
