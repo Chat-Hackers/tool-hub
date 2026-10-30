@@ -61,6 +61,7 @@ export default async function startWebServer(modules) {
 
         if (adminTokens.find(token => token.admin_token === adminCode as string)) {
             res.send({ success: true });
+            return;
         }
         res.send({ success: false });
     })
