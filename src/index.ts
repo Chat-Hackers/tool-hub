@@ -157,13 +157,19 @@ async function handleWrapperEvent(event: MatrixEvent) {
 
     if (emoji.includes("❌")) {
         await insertOptOut(roomId, event.sender);
-        await sendMessage(roomId, "You have opted out of Chat Hackers processing your data. Use the tick (✔️) react to opt back in.");
+        await sendMessage(roomId, "You have opted out of Chat Hackers processing your data. Use the tick (✔️) react to opt back in.", {
+            moduleEvent: false,
+            wrapperEvent: true,
+        });
         return;
     }
 
     if (emoji.includes("✔️")) {
         await deleteOptOut(roomId, event.sender);
-        await sendMessage(roomId, "You have opted back in to Chat Hackers processing your data. Use the cross (❌) react to opt back out.");
+        await sendMessage(roomId, "You have opted back in to Chat Hackers processing your data. Use the cross (❌) react to opt back out.", {
+            moduleEvent: false,
+            wrapperEvent: true,
+        });
         return;
     }
 
@@ -171,7 +177,10 @@ async function handleWrapperEvent(event: MatrixEvent) {
         const isAdmin = await checkAdmin(roomId, event.sender);
         if (isAdmin) {
             await insertAdminToken(roomId, context.newAdminCode);
-            sendMessage(roomId, `Access has been granted to this session`);
+            sendMessage(roomId, `Access has been granted to this session`, {
+                moduleEvent: false,
+                wrapperEvent: true,
+            });
         }
         return;
     }
