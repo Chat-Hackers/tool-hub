@@ -172,8 +172,6 @@ export default function Dashboard() {
     backgroundColor: "grey",
   };
 
-  console.log("adminonly", adminOnly, "admin", admin);
-
   return adminOnly && !admin ? (
     <>
       <Validation
