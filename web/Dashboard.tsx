@@ -97,7 +97,7 @@ export default function Dashboard() {
                   href={`/${tool.id}?roomId=${roomId}`}
                   className="tool-page-link"
                 >
-                  Tool Page
+                  {tool.title} →
                 </a>
               )}
             </p>
