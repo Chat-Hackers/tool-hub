@@ -93,10 +93,12 @@ export default function Dashboard() {
             <p>
               {tool.description}
               {tool.active && (
-                <>
-                  {" "}
-                  - <a href={`/${tool.id}?roomId=${roomId}`}>Tool dashboard</a>
-                </>
+                <a
+                  href={`/${tool.id}?roomId=${roomId}`}
+                  className="tool-page-link"
+                >
+                  {tool.title} →
+                </a>
               )}
             </p>
           </div>
