@@ -57,14 +57,15 @@ export default function Validation({
       <h2>This Chat Hackers Group is admin only</h2>
       {stage === "ready" && (
         <>
-          <p>Press below to start admin validation</p>
-          <button onClick={startValidation}>Validate</button>
+          <p>You need admin validation from your group to see the dashboard</p>
+          <button onClick={startValidation}>Send validation message</button>
         </>
       )}
       {stage === "inProgress" && (
         <>
           <p>
-            Waiting for an admin to approve the validation from the group chat
+            Waiting for an admin to approve the validation message in the group
+            chat
           </p>
           <button onClick={checkApproval}>Check approval</button>
         </>

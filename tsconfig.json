@@ -1,5 +1,5 @@
 {
-    "exclude": ["./web", "./dist-web"],
+    "exclude": ["./web","./dist-web"],
     "compilerOptions": {
        "module": "NodeNext",
         "moduleResolution": "NodeNext",
@@ -7,7 +7,7 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "lib": ["es2022", "esnext.temporal"],
+        "lib": ["es2022", "DOM", "esnext.temporal"],
         "jsx": "react-jsx",
         "resolveJsonModule": true,
         "noImplicitAny": false

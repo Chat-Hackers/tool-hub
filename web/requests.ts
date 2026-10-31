@@ -1,3 +1,5 @@
+import { Temporal } from "@js-temporal/polyfill";
+
 const { VITE_HUB_URL } = import.meta.env;
 
 export async function getToolUseSetting(roomId: string) {
@@ -56,4 +58,10 @@ export async function checkCode(roomId: string, adminCode: string) {
 
 export function getContentUrl(mxcUrl: string) {
     return `${VITE_HUB_URL}/api/content?mxcUrl=${mxcUrl}`
+}
+
+export async function getRoomEvents(roomId: string, since: Temporal.Instant) {
+    const eventsResponse = await fetch(`${VITE_HUB_URL}/api/room/history?roomId=${roomId}&since=${since.toString()}`);
+    const events = await eventsResponse.json();
+    return events;
 }

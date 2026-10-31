@@ -1,16 +1,16 @@
-import { useSearchParams, Link } from "react-router";
+import { useSearchParams } from "react-router";
 import { useEffect, useState, useRef } from "react";
 import { Wrench, ChartColumnBig, MessagesSquare } from "lucide-react";
-import { type Room, Tool, MatrixEvent } from "../types";
+import { type Room, Tool } from "../types";
 import {
   getTools,
   getRoom,
   postToolActivation,
   getToolUseSetting,
-  postNewAdminCode,
 } from "./requests";
 import Toggle from "./common/Toggle";
 import Message, { AudioMessage } from "./common/Message";
+import Stats from "./Stats";
 import Validation from "./Validation";
 
 export default function Dashboard() {
@@ -64,9 +64,6 @@ export default function Dashboard() {
     }
   }, [room, nav]);
 
-  const messageCount =
-    room &&
-    room.timeline.filter((event) => event.type === "m.room.message").length;
   const participants: { [key: string]: "join" } = {};
   room &&
     room.timeline
@@ -133,33 +130,6 @@ export default function Dashboard() {
     </div>
   );
 
-  const firstMessage = room?.timeline[room.timeline.length - 1];
-  const firstMessageDate = new Date(firstMessage?.origin_server_ts || 0);
-  const lastMessage = room?.timeline[0];
-  const lastMessageDate = new Date(lastMessage?.origin_server_ts || 0);
-
-  const statsPanel = (
-    <div id="stats-container">
-      <h1>{room ? room.title : "Room"}</h1>
-      <p>{messageCount} messages</p>
-      <p>{Object.keys(participants).length} members</p>
-      <p>
-        First message:{" "}
-        {firstMessageDate.toLocaleString("en-GB", {
-          dateStyle: "short",
-          timeStyle: "short",
-        })}
-      </p>
-      <p>
-        Last message:{" "}
-        {lastMessageDate.toLocaleString("en-GB", {
-          dateStyle: "short",
-          timeStyle: "short",
-        })}
-      </p>
-    </div>
-  );
-
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 1200);
 
@@ -185,13 +155,13 @@ export default function Dashboard() {
     <div id="tools-chat-container">
       {toolsPanel}
       {chatPanel}
-      {statsPanel}
+      <Stats room={room} roomId={roomId || ""} />
     </div>
   ) : (
     <>
       {nav === "tools" && toolsPanel}
       {nav === "chat" && chatPanel}
-      {nav === "stats" && statsPanel}
+      {nav === "stats" && <Stats room={room} roomId={roomId || ""} />}
       <div id="navbar">
         <button
           onClick={() => setNav("tools")}

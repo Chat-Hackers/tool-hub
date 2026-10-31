@@ -48,6 +48,19 @@ a {
   color: black;
 }
 
+button {
+  border: 1px solid black;
+  outline: 1px solid black;
+  outline-offset: 2px;
+  font-size: 14px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
 #title {
   margin-top: 0px;
   height: 32px;
@@ -69,13 +82,12 @@ a {
   flex-direction: row;
   width: 100%;
   justify-content: center;
-  container-type: inline-size;
+  align-items: center;
 }
 
 #tools-container {
-  /* width: 50%; */
   padding: 5px;
-  max-height: 90vh;
+  max-height: 99vh;
   overflow-y: auto;
 }
 
@@ -176,6 +188,7 @@ a {
   flex-direction: row;
   width: 100%;
   justify-content: space-between;
+  align-items: baseline;
 }
 
 .tool-title {
@@ -478,4 +491,12 @@ input:checked + .toggle-thumb::before {
 
 input:focus-visible + .toggle-thumb {
   box-shadow: 0 0 0 2px #5dcaa5;
+}
+
+/* Stats Page */
+
+.tips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
 }
