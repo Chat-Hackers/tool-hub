@@ -159,7 +159,7 @@ export default function Dashboard() {
     </div>
   );
 
-  const isDesktop = window.innerWidth > 700;
+  const isDesktop = window.innerWidth > 1200;
   const navSelectedStyle = {
     color: "white",
     backgroundColor: "grey",

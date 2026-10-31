@@ -86,12 +86,25 @@ a {
   align-items: start;
   margin: 15px;
   padding: 5px;
-  flex: 1;
 }
 
-@container (min-width: 1500px) {
+@media (min-width: 600px) {
   #tools-container {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1200px) {
+  #tools-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1500px) {
+  #tools-container {
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    max-width: 1000px;
   }
 }
 
@@ -132,7 +145,7 @@ a {
   outline: 1px solid black;
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1200px) {
   #root {
     justify-content: flex-end;
   }
@@ -236,7 +249,7 @@ a {
   overflow: auto;
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1200px) {
   #phone {
     border: none;
     max-width: none;
