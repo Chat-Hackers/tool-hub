@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [room, setRoom] = useState<Room>();
   const [nav, setNav] = useState<"tools" | "chat" | "stats">("tools");
   const chatRef = useRef<HTMLDivElement>(null);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1200);
 
   async function loadToolUseSetting(roomId: string) {
     const toolUseSetting = await getToolUseSetting(roomId);
@@ -159,7 +160,13 @@ export default function Dashboard() {
     </div>
   );
 
-  const isDesktop = window.innerWidth > 1200;
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth > 1200);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize); // cleanup
+  }, []);
+
   const navSelectedStyle = {
     color: "white",
     backgroundColor: "grey",
