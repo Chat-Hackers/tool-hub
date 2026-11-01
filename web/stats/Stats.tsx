@@ -130,15 +130,17 @@ export default function Stats({ room, roomId }: { room: any; roomId: string }) {
   return (
     <div id="stats-container">
       <h1>{room ? room.title : "Room"}</h1>
-      <TimeRangeSelect onChange={(since) => setSince(since)} />
-      <label>
-        <input
-          type="checkbox"
-          checked={hideNames}
-          onChange={(e) => setHideNames(e.target.checked)}
-        />{" "}
-        Hide Names
-      </label>
+      <div id="select-container">
+        <TimeRangeSelect onChange={(since) => setSince(since)} />
+        <label>
+          <input
+            type="checkbox"
+            checked={hideNames}
+            onChange={(e) => setHideNames(e.target.checked)}
+          />{" "}
+          Hide Names
+        </label>
+      </div>
       <AtAGlance total={total} optOuts={optOutsTotal} />
       <HowBusy weeks={weeks} setTip={setTip} />
       <WhoParticipates

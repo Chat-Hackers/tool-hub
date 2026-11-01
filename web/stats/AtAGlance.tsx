@@ -12,35 +12,29 @@ export default function AtAGlance({
       <h2>✨ At a glance</h2>
       <div className="tiles">
         <div className="tile tile-people">
-          <span className="icon">🙋</span>
-          <span className="value">{total.joinedIn}</span>
+          <span className="value">🙋{total.joinedIn}</span>
           <span className="label">
             {total.joinedIn === 1 ? "person joined in" : "people joined in"}
           </span>
         </div>
         <div className="tile tile-messages">
-          <span className="icon">💬</span>
-          <span className="value">{total.messages}</span>
+          <span className="value">💬{total.messages}</span>
           <span className="label">messages</span>
         </div>
         <div className="tile tile-replies">
-          <span className="icon">↩️</span>
-          <span className="value">{total.replies}</span>
+          <span className="value">↩️{total.replies}</span>
           <span className="label">replies</span>
         </div>
         <div className="tile tile-reactions">
-          <span className="icon">👍</span>
-          <span className="value">{total.reactions}</span>
+          <span className="value">👍{total.reactions}</span>
           <span className="label">reactions</span>
         </div>
         <div className="tile tile-links">
-          <span className="icon">🔗</span>
-          <span className="value">{total.links}</span>
+          <span className="value">🔗{total.links}</span>
           <span className="label">links shared</span>
         </div>
         <div className="tile tile-new">
-          <span className="icon">👋</span>
-          <span className="value">{total.newParticipants}</span>
+          <span className="value">👋{total.newParticipants}</span>
           <span className="label">new members</span>
         </div>
       </div>
