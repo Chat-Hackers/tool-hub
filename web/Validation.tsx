@@ -53,7 +53,7 @@ export default function Validation({
   }, [adminCode]);
 
   return (
-    <>
+    <div id="validation">
       <h2>This Chat Hackers Group is admin only</h2>
       {stage === "ready" && (
         <>
@@ -70,6 +70,6 @@ export default function Validation({
           <button onClick={checkApproval}>Check approval</button>
         </>
       )}
-    </>
+    </div>
   );
 }
