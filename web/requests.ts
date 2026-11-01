@@ -65,3 +65,9 @@ export async function getRoomEvents(roomId: string, since: Temporal.Instant) {
     const events = await eventsResponse.json();
     return events;
 }
+
+export async function getOptOuts(roomId: string){
+    const optOutsResponse = await fetch(`${VITE_HUB_URL}/api/optouts?roomId=${roomId}`);
+    const optOuts = await optOutsResponse.json();
+    return optOuts;
+}

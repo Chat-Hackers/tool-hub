@@ -79,6 +79,14 @@ export default async function startWebServer(modules) {
         res.send({ success: true });
     })
 
+    app.get("/api/optouts", async (req,res)=>{
+        const {roomId} = req.query;
+
+        const optOuts = await getOptOutsByRoomId(roomId as string);
+
+        res.send(optOuts);
+    })
+
     app.get("/api/tools", async (req, res) => {
         const { roomId } = req.query;
 

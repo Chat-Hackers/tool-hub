@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { type MatrixEvent } from "../types";
 import { Temporal } from "@js-temporal/polyfill";
-import { getRoomEvents } from "./requests";
+import { getRoomEvents, getOptOuts } from "./requests";
+import { LinkifyIt } from "linkify-it";
 
 const groupTips: [string, string, string][] = [
   [
@@ -66,6 +67,67 @@ const groupTips: [string, string, string][] = [
   ],
 ];
 
+type Total = {
+  joinedIn: number;
+  messages: number;
+  replies: number;
+  reactions: number;
+  links: number;
+  newParticipants: number;
+};
+
+export function AtAGlance({
+  total,
+  optOuts,
+}: {
+  total: Total;
+  optOuts: number;
+}) {
+  return (
+    <section>
+      <h2>✨ At a glance</h2>
+      <div className="tiles">
+        <div className="tile tile-people">
+          <span className="icon">🙋</span>
+          <span className="value">{total.joinedIn}</span>
+          <span className="label">
+            {total.joinedIn === 1 ? "person joined in" : "people joined in"}
+          </span>
+        </div>
+        <div className="tile tile-messages">
+          <span className="icon">💬</span>
+          <span className="value">{total.messages}</span>
+          <span className="label">messages</span>
+        </div>
+        <div className="tile tile-replies">
+          <span className="icon">↩️</span>
+          <span className="value">{total.replies}</span>
+          <span className="label">replies</span>
+        </div>
+        <div className="tile tile-reactions">
+          <span className="icon">👍</span>
+          <span className="value">{total.reactions}</span>
+          <span className="label">reactions</span>
+        </div>
+        <div className="tile tile-links">
+          <span className="icon">🔗</span>
+          <span className="value">{total.links}</span>
+          <span className="label">links shared</span>
+        </div>
+        <div className="tile tile-new">
+          <span className="icon">👋</span>
+          <span className="value">{total.newParticipants}</span>
+          <span className="label">new members</span>
+        </div>
+      </div>
+      <p className="note">
+        {optOuts > 0 &&
+          ` ${optOuts} ${optOuts === 1 ? "person has" : "people have"} opted out and ${optOuts === 1 ? "isn't" : "aren't"} counted.`}
+      </p>
+    </section>
+  );
+}
+
 const releaseInstant = new Temporal.Instant(1793453271852000000n);
 
 const OPTIONS: Record<string, Temporal.DurationLike | null> = {
@@ -104,9 +166,54 @@ export function TimeRangeSelect({
   );
 }
 
+function processTimeline(timeline: MatrixEvent[]) {
+  const analytics = {
+    total: {
+      joinedIn: 0,
+      messages: 0,
+      replies: 0,
+      reactions: 0,
+      links: 0,
+      newParticipants: 0,
+    },
+  };
+
+  const senders: string[] = [];
+
+  timeline.forEach((event: MatrixEvent) => {
+    if (!senders.includes(event.sender)) {
+      senders.push(event.sender);
+      analytics.total.joinedIn++;
+    }
+    if (event.type === "m.room.message") {
+      analytics.total.messages++;
+    }
+    if (event.type === "m.room.message" && event.content["m.relates_to"]) {
+      analytics.total.replies++;
+    }
+    if (event.type === "m.reaction") {
+      analytics.total.reactions++;
+    }
+    if (event.type === "m.room.message" && event.content.body) {
+      const linkify = new LinkifyIt({ fuzzyLink: true });
+      const urls = linkify.match(event.content.body);
+
+      if (urls) {
+        analytics.total.links++;
+      }
+    }
+    if (event.type === "m.room.member" && event.content.membership === "join") {
+      analytics.total.newParticipants++;
+    }
+  });
+
+  return analytics;
+}
+
 export default function Stats({ room, roomId }: { room: any; roomId: string }) {
   const [since, setSince] = useState<Temporal.Instant>(releaseInstant);
   const [timeline, setTimeline] = useState([]);
+  const [optOutsTotal, setOptOutsTotal] = useState(0);
   const [tipsExpanded, setTipsExpanded] = useState(false);
 
   async function loadTimeline() {
@@ -114,17 +221,25 @@ export default function Stats({ room, roomId }: { room: any; roomId: string }) {
     setTimeline(events);
   }
 
+  async function loadOptOuts() {
+    const optOuts = await getOptOuts(roomId);
+    setOptOutsTotal(optOuts.length);
+  }
+
   useEffect(() => {
     loadTimeline();
+    loadOptOuts();
   }, [since]);
 
-  console.log(timeline);
+  const { total } = processTimeline(timeline);
 
   return (
     <div id="stats-container">
       <h1>{room ? room.title : "Room"}</h1>
       <TimeRangeSelect onChange={(since) => setSince(since)} />
-      {/* At a Glance  */}
+
+      <AtAGlance total={total} optOuts={optOutsTotal} />
+
       {/* Graph/Table */}
       {/* Who Participates */}
       {/* Kinds of messages */}
