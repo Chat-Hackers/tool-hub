@@ -96,6 +96,7 @@ export type ResponseByType = {
 
 export default function Stats({ room, roomId }: { room: any; roomId: string }) {
   const [since, setSince] = useState<Temporal.Instant>(releaseInstant);
+  const [hideNames, setHideNames] = useState(false);
   const [timeline, setTimeline] = useState([]);
   const [optOutsTotal, setOptOutsTotal] = useState(0);
   const [tipsExpanded, setTipsExpanded] = useState(false);
@@ -130,12 +131,20 @@ export default function Stats({ room, roomId }: { room: any; roomId: string }) {
     <div id="stats-container">
       <h1>{room ? room.title : "Room"}</h1>
       <TimeRangeSelect onChange={(since) => setSince(since)} />
+      <label>
+        <input
+          type="checkbox"
+          checked={hideNames}
+          onChange={(e) => setHideNames(e.target.checked)}
+        />{" "}
+        Hide Names
+      </label>
       <AtAGlance total={total} optOuts={optOutsTotal} />
       <HowBusy weeks={weeks} setTip={setTip} />
       <WhoParticipates
         weeks={weeks}
         setTip={setTip}
-        hideNames={false}
+        hideNames={hideNames}
         participants={participants}
         concentration={concentration}
       />
