@@ -1,8 +1,16 @@
+:root {
+  --surface-2: #2c2731;
+  --border: #3a3440;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+}
+
 html,
 body,
 #root {
   height: 100dvh;
   scrollbar-color: #ffffff65 #ffffff00;
+  overflow: hidden;
 }
 
 body {
@@ -89,6 +97,7 @@ button:hover {
 #tools-chat-container {
   display: flex;
   flex-direction: row;
+  height: 100%;
   width: 100%;
   justify-content: center;
   align-items: center;
@@ -136,8 +145,10 @@ button:hover {
 }
 
 #stats-container {
+  height: 100%;
   padding: 5px;
   flex: 1;
+  overflow-y: auto;
 }
 
 #chat-title {
@@ -509,4 +520,103 @@ input:focus-visible + .toggle-thumb {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
+}
+
+/* charts */
+
+.legend {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.series-1 {
+  fill: var(--series-1);
+  background: var(--series-1);
+}
+
+.series-2 {
+  fill: var(--series-2);
+  background: var(--series-2);
+}
+
+.chart-scroll,
+.table-scroll {
+  overflow-x: auto;
+}
+
+svg .axis {
+  stroke: var(--border);
+}
+
+svg .tick {
+  fill: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  text-anchor: middle;
+}
+
+svg .hit {
+  fill: transparent;
+}
+
+svg g:hover .hit {
+  fill: var(--surface-2);
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 110px;
+  gap: 10px;
+  align-items: center;
+}
+
+.bar-label {
+  font-weight: 600;
+}
+
+.bar-track {
+  height: 16px;
+  background: var(--surface-2);
+  border-radius: 999px;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  min-width: 4px;
+}
+
+.bar-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.bar-value small {
+  color: var(--text-secondary);
+  font-weight: 400;
 }

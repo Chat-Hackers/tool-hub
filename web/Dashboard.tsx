@@ -10,7 +10,7 @@ import {
 } from "./requests";
 import Toggle from "./common/Toggle";
 import Message, { AudioMessage } from "./common/Message";
-import Stats from "./Stats";
+import Stats from "./stats/Stats";
 import Validation from "./Validation";
 
 export default function Dashboard() {
