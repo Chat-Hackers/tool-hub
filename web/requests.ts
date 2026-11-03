@@ -66,8 +66,22 @@ export async function getRoomEvents(roomId: string, since: Temporal.Instant) {
     return events;
 }
 
-export async function getOptOuts(roomId: string){
+export async function getOptOuts(roomId: string) {
     const optOutsResponse = await fetch(`${VITE_HUB_URL}/api/optouts?roomId=${roomId}`);
     const optOuts = await optOutsResponse.json();
     return optOuts;
+}
+
+export async function postThemes(month: string, lines: string[]) {
+    const themesResponse = await fetch(`${VITE_HUB_URL}/api/themes`, {
+        method: "POST",
+        body: JSON.stringify({
+            month, lines
+        }),
+        headers: {
+            "Content-type": "application/json"
+        }
+    });
+    const themes = await themesResponse.json();
+    return themes;
 }

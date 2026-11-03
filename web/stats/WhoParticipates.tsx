@@ -1,12 +1,34 @@
 import { useState, useMemo } from "react";
-import {
-  type ParticipantSummary,
-  type Pattern,
-  type Week,
-  type Tip,
-  type Concentration,
-} from "./Stats";
+import { type Week, type Tip, type Concentration } from "./Stats";
 import { heatStep, day, daysAgo } from "./Stats";
+
+export type Pattern =
+  | "new"
+  | "back"
+  | "quiet-this-week"
+  | "quieter"
+  | "long-quiet"
+  | "not-seen"
+  | "mostly-reacts"
+  | "starts-conversations"
+  | "draws-responses";
+
+export type ParticipantSummary = {
+  id: string;
+  name: string;
+  firstSeen: number;
+  joinedAt: number | null;
+  lastActive: number | null;
+  messages: number;
+  reactions: number;
+  replies: number;
+  links: number;
+  conversationsStarted: number;
+  responsesReceived: number;
+  activeDays: number;
+  weekly: number[];
+  patterns: Pattern[];
+};
 
 type Filter = "all" | "check-in" | Pattern;
 

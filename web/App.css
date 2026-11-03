@@ -147,7 +147,7 @@ select {
   #tools-container {
     grid-template-columns: 1fr 1fr;
     flex: 1;
-    max-width: 1000px;
+    max-width: 650px;
   }
 }
 
@@ -867,4 +867,46 @@ button.filter.on .filter-count {
   border-radius: 10px;
   max-width: 280px;
   z-index: 10;
+}
+
+/* Themes */
+
+.themes-month h3 small {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 0.88rem;
+}
+
+.themes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.themes li {
+  background: var(--accent-soft);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.themes p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+}
+
+.prominence {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  background: var(--surface-1);
+  border-radius: 999px;
+  padding: 1px 9px;
+  margin-right: 8px;
+  color: var(--text-secondary);
+}
+
+.prominence.major {
+  color: var(--accent);
 }

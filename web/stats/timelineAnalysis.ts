@@ -1,6 +1,8 @@
 import { LinkifyIt } from "linkify-it";
 import { type MatrixEvent } from "../../types";
-import { type Total, type Week, type ParticipantSummary, Concentration } from "./Stats";
+import { type Total, Week, Concentration } from "./Stats";
+import { type ParticipantSummary } from "./WhoParticipates";
+import { derivePatterns } from "./derivePatterns";
 
 // Monday 00:00 UTC of the week containing the timestamp
 function getWeekStart(timestamp: number): number {
@@ -37,7 +39,12 @@ function getReplyTarget(content: any): string | null {
   return rel["m.in_reply_to"]?.event_id ?? null;
 }
 
-export default function processTimeline(timeline: MatrixEvent[]) {
+// `now` is a parameter so "quiet this week" means something in a live room,
+// and so the function is testable.
+export default function processTimeline(
+  timeline: MatrixEvent[],
+  now: number = Date.now(),
+) {
   const analytics: {
     total: Total;
     weeks: Week[];
@@ -72,10 +79,14 @@ export default function processTimeline(timeline: MatrixEvent[]) {
   const participants: Record<string, ParticipantSummary> = {};
   const participantDays: Record<string, Set<number>> = {};
   const participantWeekly: Record<string, Record<number, number>> = {};
+  // Timestamps of messages and reactions only (not joins, leaves or edits).
+  // Chronological because the timeline is sorted before processing.
+  const participantContributions: Record<string, number[]> = {};
   let previousMessageTs: number | null = null;
 
   const messageTypeById: Record<string, string> = {};
-  const responseTargets: string[] = [];
+  const messageSenderById: Record<string, string> = {};
+  const responses: { targetId: string; from: string }[] = [];
 
   const getMessageType = (content: any): string => {
     if (
@@ -110,13 +121,14 @@ export default function processTimeline(timeline: MatrixEvent[]) {
         replies: 0,
         links: 0,
         conversationsStarted: 0,
-        responsesReceived: 0, // TODO
+        responsesReceived: 0,
         activeDays: 0,
         weekly: [],
-        patterns: [], // TODO
+        patterns: [],
       };
       participantDays[id] = new Set();
       participantWeekly[id] = {};
+      participantContributions[id] = [];
     }
     return participants[id];
   };
@@ -166,6 +178,7 @@ export default function processTimeline(timeline: MatrixEvent[]) {
       analytics.total.messages++;
       week.messages++;
       participant.messages++;
+      participantContributions[event.sender].push(timestamp);
 
       if (
         previousMessageTs === null ||
@@ -177,6 +190,7 @@ export default function processTimeline(timeline: MatrixEvent[]) {
 
       if (event.content.msgtype) {
         messageTypeById[event.event_id] = getMessageType(event.content);
+        messageSenderById[event.event_id] = event.sender;
       }
     }
     if (isMessage) {
@@ -185,16 +199,17 @@ export default function processTimeline(timeline: MatrixEvent[]) {
         analytics.total.replies++;
         week.replies++;
         participant.replies++;
-        responseTargets.push(replyTarget);
+        responses.push({ targetId: replyTarget, from: event.sender });
       }
     }
     if (event.type === "m.reaction") {
       analytics.total.reactions++;
       week.reactions++;
       participant.reactions++;
+      participantContributions[event.sender].push(timestamp);
 
       const target = event.content["m.relates_to"]?.event_id;
-      if (target) responseTargets.push(target);
+      if (target) responses.push({ targetId: target, from: event.sender });
     }
     if (isMessage && event.content.body) {
       const urls = linkify.match(event.content.body);
@@ -206,23 +221,37 @@ export default function processTimeline(timeline: MatrixEvent[]) {
       }
     }
     if (event.type === "m.room.member" && event.content.membership === "join") {
-      analytics.total.newParticipants++;
-      week.newParticipants++;
+      // A "join" event is also sent for display name / avatar changes. Those
+      // carry prev_content.membership === "join" and aren't new joins.
+      const previousMembership = (event as any).unsigned?.prev_content
+        ?.membership;
+      const isNewJoin = previousMembership !== "join";
 
       // For member events the subject is state_key (usually the same as sender)
       const member = getParticipant(event.state_key ?? event.sender, timestamp);
-      member.joinedAt = member.joinedAt ?? timestamp;
+
+      if (isNewJoin) {
+        analytics.total.newParticipants++;
+        week.newParticipants++;
+        member.joinedAt = member.joinedAt ?? timestamp;
+      }
       if (event.content.displayname) {
         member.name = event.content.displayname;
       }
     }
   });
 
-  // Second pass: credit each response to the message it targets
+  // Second pass: credit each response to the message it targets, and to
+  // that message's author (people responding to themselves don't count).
   const responseCountById: Record<string, number> = {};
-  responseTargets.forEach((id) => {
-    if (id in messageTypeById) {
-      responseCountById[id] = (responseCountById[id] ?? 0) + 1;
+  responses.forEach(({ targetId, from }) => {
+    if (!(targetId in messageTypeById)) return;
+
+    responseCountById[targetId] = (responseCountById[targetId] ?? 0) + 1;
+
+    const author = messageSenderById[targetId];
+    if (author && author !== from) {
+      participants[author].responsesReceived++;
     }
   });
 
@@ -261,6 +290,24 @@ export default function processTimeline(timeline: MatrixEvent[]) {
     weekly: analytics.weeks.map(
       (w) => participantWeekly[p.id][w.weekStart] ?? 0
     ),
+  }));
+
+  // Room-wide responses per message, using the same definition as
+  // responsesReceived (self-responses excluded) so the comparison is fair.
+  const totalResponsesReceived = analytics.participants.reduce(
+    (sum, p) => sum + p.responsesReceived,
+    0,
+  );
+  const roomAverageResponses = analytics.total.messages
+    ? totalResponsesReceived / analytics.total.messages
+    : 0;
+
+  analytics.participants = analytics.participants.map((p) => ({
+    ...p,
+    patterns: derivePatterns(p, participantContributions[p.id], {
+      now,
+      roomAverageResponses,
+    }),
   }));
 
   const posterCounts = analytics.participants.map(p => p.messages).filter(n => n > 0).sort((a, b) => b - a);

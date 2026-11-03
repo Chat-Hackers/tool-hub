@@ -5,6 +5,7 @@ import { activateModule, deactivateModule } from "./index";
 import { getActiveModulesForRoomId, getAdminTokens, getOptOutsByRoomId, getToolUseSetting } from "./duckdb";
 import { getRoomEvents, sendMessage, sendEvent, getMediaUrl, getMedia, fetchEventsSince, getRoomName, kickUser } from "./matrixClientRequests";
 import { RoomResult } from "../types";
+import { generateThemes } from "./requests";
 
 const { userId } = process.env;
 
@@ -79,8 +80,8 @@ export default async function startWebServer(modules) {
         res.send({ success: true });
     })
 
-    app.get("/api/optouts", async (req,res)=>{
-        const {roomId} = req.query;
+    app.get("/api/optouts", async (req, res) => {
+        const { roomId } = req.query;
 
         const optOuts = await getOptOutsByRoomId(roomId as string);
 
@@ -206,6 +207,14 @@ export default async function startWebServer(modules) {
         else {
             return res.send({ success: false, message: "module is not active in this room" })
         }
+    })
+
+    app.post("/api/themes", async (req, res) => {
+        const { month, lines } = req.body;
+
+        const themes = await generateThemes(month, lines);
+
+        res.send(themes);
     })
 
     app.get("/api/content", async (req, res) => {

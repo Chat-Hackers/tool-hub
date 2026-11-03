@@ -8,6 +8,7 @@ import AtAGlance from "./AtAGlance";
 import HowBusy from "./HowBusy";
 import WhoParticipates from "./WhoParticipates";
 import WhatGetsPeople from "./WhatGetsPeople";
+import Themes from "./Themes";
 
 export type Total = {
   joinedIn: number;
@@ -52,34 +53,6 @@ export function heatStep(count: number) {
 }
 
 export type Tip = { x: number; y: number; text: string } | null;
-
-export type Pattern =
-  | "new"
-  | "back"
-  | "quiet-this-week"
-  | "quieter"
-  | "long-quiet"
-  | "not-seen"
-  | "mostly-reacts"
-  | "starts-conversations"
-  | "draws-responses";
-
-export type ParticipantSummary = {
-  id: string;
-  name: string;
-  firstSeen: number;
-  joinedAt: number | null;
-  lastActive: number | null;
-  messages: number;
-  reactions: number;
-  replies: number;
-  links: number;
-  conversationsStarted: number;
-  responsesReceived: number;
-  activeDays: number;
-  weekly: number[];
-  patterns: Pattern[];
-};
 
 export type Concentration = {
   posters: number;
@@ -155,8 +128,7 @@ export default function Stats({ room, roomId }: { room: any; roomId: string }) {
         maxResponses={maxResponses}
         setTip={setTip}
       />
-
-      {/* Themes */}
+      <Themes timeline={timeline} />
 
       <Tips tipsExpanded={tipsExpanded} setTipsExpanded={setTipsExpanded} />
 
