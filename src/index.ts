@@ -393,7 +393,8 @@ async function sync(batch = null) {
                         handleWrapperEvent(event);
                     else {
                         const optOut = await getOptOut(roomId, event.sender);
-                        if (!optOut)
+                        const prevEventOptOut = event.prevEvent ?? await getOptOut(roomId, event.prevEvent.sender);
+                        if (!optOut && !prevEventOptOut)
                             handleToolEvent(event);
                     }
 
