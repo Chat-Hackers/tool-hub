@@ -70,8 +70,8 @@ export default async function startWebServer(modules) {
     app.post("/api/admincode", async (req, res) => {
         const { roomId, newAdminCode } = req.body;
 
-        await sendMessage(roomId, `Someone is attempting to access the dashboard. 
-            An admin must heart react (❤️) this message to allow access`, {
+        await sendMessage(roomId, "Someone is attempting to access the dashboard. " +
+            "An admin must heart react (❤️) this message to allow access", {
             wrapperEvent: true,
             moduleEvent: false,
             newAdminCode
