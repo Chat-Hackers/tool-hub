@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   async function loadToolUseSetting(roomId: string) {
     const toolUseSetting = await getToolUseSetting(roomId);
-    setAdminOnly(toolUseSetting.admin_only);
+    setAdminOnly(toolUseSetting && toolUseSetting.admin_only);
   }
 
   async function loadTools(roomId: string) {
