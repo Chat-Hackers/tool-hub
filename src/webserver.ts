@@ -52,7 +52,7 @@ export default async function startWebServer(modules) {
 
         const toolUseSetting = await getToolUseSetting(roomId as string);
 
-        res.send(toolUseSetting);
+        res.send(toolUseSetting ?? {});
     })
 
     app.get("/api/admincode", async (req, res) => {
