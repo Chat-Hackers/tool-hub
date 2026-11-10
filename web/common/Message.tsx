@@ -4,6 +4,20 @@ import { Play, Volume2 } from "lucide-react";
 
 import { getContentUrl } from "../requests";
 
+export function ImageMessage({ url, side }: { url: string; side: string }) {
+  return (
+    <div className={`message ${side}`}>
+      {side === "left" && <span className="triangle left"></span>}
+
+      <div className={`message-text ${side}`}>
+        <img src={getContentUrl(url)} />
+      </div>
+
+      {side === "right" && <span className="triangle right"></span>}
+    </div>
+  );
+}
+
 export function AudioMessage({ url, side }: { url: string; side: string }) {
   const [loaded, setLoaded] = useState(false);
 

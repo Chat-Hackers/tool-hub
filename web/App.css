@@ -336,6 +336,10 @@ select {
   z-index: 1;
 }
 
+.message img {
+  max-width: 100%;
+}
+
 /* Shared size so the button and the player occupy the same space */
 .audio-message {
   --audio-width: 260px;

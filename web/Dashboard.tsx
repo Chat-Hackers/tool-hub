@@ -9,7 +9,7 @@ import {
   getToolUseSetting,
 } from "./requests";
 import Toggle from "./common/Toggle";
-import Message, { AudioMessage } from "./common/Message";
+import Message, { AudioMessage, ImageMessage } from "./common/Message";
 import Stats from "./stats/Stats";
 import Validation from "./Validation";
 
@@ -119,12 +119,17 @@ export default function Dashboard() {
                   text={event.content.body}
                   side={event.sender === room.botId ? "left" : "right"}
                 />
-              ) : (
+              ) : event.content.msgtype === "m.audio" ? (
                 <AudioMessage
                   url={event.content.url}
                   side={event.sender === room.botId ? "left" : "right"}
                 />
-              ),
+              ) : event.content.msgtype === "m.image" ? (
+                <ImageMessage
+                  url={event.content.url}
+                  side={event.sender === room.botId ? "left" : "right"}
+                />
+              ) : null,
             )}
       </div>
     </div>
