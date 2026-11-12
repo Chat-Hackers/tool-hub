@@ -122,6 +122,29 @@ async function handleWrapperEvent(event: MatrixEvent) {
     if (!emoji)
         return;
 
+    // these need to be done by non-admins
+    if (emoji.includes("❌")) {
+        await insertOptOut(roomId, event.sender);
+        await sendMessage(roomId, "You have opted out of Chat Hackers processing your data. Use the tick (✔️) react to opt back in.", {
+            moduleEvent: false,
+            wrapperEvent: true,
+        });
+        return;
+    }
+
+    if (emoji.includes("✔️")) {
+        await deleteOptOut(roomId, event.sender);
+        await sendMessage(roomId, "You have opted back in to Chat Hackers processing your data. Use the cross (❌) react to opt back out.", {
+            moduleEvent: false,
+            wrapperEvent: true,
+        });
+        return;
+    }
+
+    const isAdmin = await checkAdmin(roomId, event.sender);
+    if (!isAdmin)
+        return;
+
     if (emoji.includes("⚙️")) {
         await sendWrapperOpener(event);
         return;
@@ -155,23 +178,7 @@ async function handleWrapperEvent(event: MatrixEvent) {
         return;
     }
 
-    if (emoji.includes("❌")) {
-        await insertOptOut(roomId, event.sender);
-        await sendMessage(roomId, "You have opted out of Chat Hackers processing your data. Use the tick (✔️) react to opt back in.", {
-            moduleEvent: false,
-            wrapperEvent: true,
-        });
-        return;
-    }
 
-    if (emoji.includes("✔️")) {
-        await deleteOptOut(roomId, event.sender);
-        await sendMessage(roomId, "You have opted back in to Chat Hackers processing your data. Use the cross (❌) react to opt back out.", {
-            moduleEvent: false,
-            wrapperEvent: true,
-        });
-        return;
-    }
 
     if (context.newAdminCode && emoji.includes("❤️")) {
         const isAdmin = await checkAdmin(roomId, event.sender);
