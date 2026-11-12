@@ -178,8 +178,6 @@ async function handleWrapperEvent(event: MatrixEvent) {
         return;
     }
 
-
-
     if (context.newAdminCode && emoji.includes("❤️")) {
         const isAdmin = await checkAdmin(roomId, event.sender);
         if (isAdmin) {
